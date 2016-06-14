@@ -1,6 +1,6 @@
 #include "PlayThread.h"
 
-#include <io/SfxInputProxy.h>
+#include <io/proxies/SfxInputProxy.h>
 #include <stream_io/RtAudioOutput.h>
 
 PlayThread::PlayThread(QObject *parent) :

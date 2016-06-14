@@ -6,6 +6,7 @@
 #include "SongData.h"
 
 #include <QWidget>
+#include <math.h>
 
 namespace Ui {
 class ChannelListWidget;

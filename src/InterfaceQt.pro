@@ -49,8 +49,8 @@ FORMS   += MainWindow.ui \
 	MainWidget.ui \
 	ConfigurationDialog.ui
 
-INCLUDEPATH += $$PWD/../../libaudiotool/src/libwatermark
-DEPENDPATH += $$PWD/../../libaudiotool/src/libwatermark
+INCLUDEPATH += $$PWD/../deps/libwatermark
+DEPENDPATH += $$PWD/../deps/libwatermark
 
 LIBS+= -lgomp -lsndfile
 #LIBS+= -lportaudiocpp -lportaudio
@@ -77,10 +77,10 @@ OTHER_FILES += \
 #### Libraries ####
   ##  Oscpack  ##
 linux-g++ {
-unix:!macx: LIBS += -L$$PWD/../../deps/linux/oscpack/ -loscpack
+unix:!macx: LIBS += -L$$PWD/../deps/oscpack/build -loscpack
 
-INCLUDEPATH += $$PWD/../../deps/src/oscpack
-DEPENDPATH += $$PWD/../../deps/src/oscpack
+INCLUDEPATH += $$PWD/../deps/oscpack
+DEPENDPATH += $$PWD/../deps/oscpack
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../deps/linux/oscpack/liboscpack.a
+unix:!macx: PRE_TARGETDEPS += $$PWD/../deps/oscpack/build/liboscpack.a
 }
