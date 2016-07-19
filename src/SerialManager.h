@@ -7,6 +7,8 @@
 #include <QtSerialPort/QtSerialPort>
 #include <memory>
 
+#include <QDebug>
+
 class QSerialPort;
 /**
  * @brief The SerialManager class
@@ -18,6 +20,8 @@ class SerialManager : public QThread {
 public:
     SerialManager(QObject* parent = 0):
         QThread(parent) {
+
+        qDebug() << "SerialManager";
     }
 
 signals:

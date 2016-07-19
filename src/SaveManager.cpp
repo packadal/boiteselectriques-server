@@ -1,6 +1,6 @@
 #include "SaveManager.h"
 
-#include "MainWidget.h"
+#include "Server.h"
 
 SaveManager::SaveManager(QObject *parent) :
     QObject(parent) {
@@ -66,7 +66,7 @@ SongData SaveManager::load(const QString loadpath) {
     return sd;
 }
 
-void SaveManager::save(const QString savepath, MainWidget* manager) {
+void SaveManager::save(const QString savepath, Server* manager) {
     //// Ouverture du fichier .ini dans le dossier temporaire
     QStringList nameFilter("*.ini");
     QDir directory(tempdir->path());
@@ -77,8 +77,10 @@ void SaveManager::save(const QString savepath, MainWidget* manager) {
     int count = settings.value("General/trackCount").toInt();
 
     for(int i = 0; i < count; ++ i) {
-        settings.setValue(QString("Track%1/volume").arg(i), manager->ui->channelList->channels[i]->ui->volume->value());
-        settings.setValue(QString("Track%1/pan").arg(i), manager->ui->channelList->channels[i]->ui->pan->value());
+        //settings.setValue(QString("Track%1/volume").arg(i), manager->ui->channelList->channels[i]->ui->volume->value());
+        //settings.setValue(QString("Track%1/pan").arg(i), manager->ui->channelList->channels[i]->ui->pan->value());
+        settings.setValue(QString("Track%1/volume").arg(i), manager->playThread.getTrack(i)->getVolume());
+        settings.setValue(QString("Track%1/pan").arg(i), manager->playThread.getTrack(i)->getPan());
     }
 
     settings.sync();

@@ -1,8 +1,8 @@
-QT       += core gui serialport
+QT += core gui serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport
 
-TARGET = InterfaceQt
+TARGET = UdooServer
 TEMPLATE = app
 
 QMAKE_CXXFLAGS += -std=c++1y
@@ -17,58 +17,36 @@ QMAKE_CXXFLAGS_DEBUG -= -O2
 QMAKE_CXXFLAGS_DEBUG += -O0 -Wno-unknown-pragmas
 
 SOURCES += main.cpp\
-		MainWindow.cpp \
-	ChannelWidget.cpp \
-	ChannelListWidget.cpp \
+        MainWindow.cpp \
 	MainWidget.cpp \
+        Track.cpp \
 	PlayThread.cpp \
 	SaveManager.cpp \
-	TrackingSlider.cpp \
-	SerialManager.cpp \
-	ConfigurationDialog.cpp \
-	GraphicalTimeCount.cpp
+        SerialManager.cpp
 
-HEADERS  += MainWindow.h \
-	ChannelWidget.h \
-	ChannelListWidget.h \
+HEADERS += MainWindow.h \
 	MainWidget.h \
+	Track.h \
 	PlayThread.h \
-	SongData.h \
+        SongData.h \
 	SaveManager.h \
-	TrackingSlider.h \
-	SerialManager.h \
-	ConfigurationDialog.h \
-#	osc/oscmessagegenerator.h \
-#	osc/oscreceiver.h \
-#	osc/oscsender.h \
-	GraphicalTimeCount.h
+        SerialManager.h
 
-FORMS    += MainWindow.ui \
-	ChannelWidget.ui \
-	ChannelListWidget.ui \
-	MainWidget.ui \
-	ConfigurationDialog.ui
+FORMS   +=
 
 INCLUDEPATH += $$PWD/../../watermarking/src/libwatermark
 DEPENDPATH += $$PWD/../../watermarking/src/libwatermark
 
-LIBS+= -lgomp -lportaudiocpp -lportaudio -lsndfile # -lavcodec -lavformat -lavutil
+LIBS+= -lgomp -lsndfile -lrtaudio # -lavcodec -lavformat -lavutil
 #LIBS+= -lgcov
 
 
 INCLUDEPATH += /usr/local/include/KF5/KArchive
 LIBS += -lKF5Archive
 
-RESOURCES += \
-	Resources.qrc
+RESOURCES += 
 
-OTHER_FILES += \
-	TrackingSliderVerticalEnabled.qss \
-	TrackingSliderVerticalDisabled.qss \
-	TrackingSliderHorizontalEnabled.qss \
-	TrackingSliderHorizontalDisabled.qss \
-	TrackingSliderVerticalSolo.qss \
-	TrackingSliderHorizontalSolo.qss
+OTHER_FILES += 
 
 
 #### Libraries ####

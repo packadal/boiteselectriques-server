@@ -2,7 +2,7 @@
 #define SAVEMANAGER_H
 
 #include "SongData.h"
-#include "ChannelWidget.h"
+//#include "ChannelWidget.h"
 
 #include <QFileInfo>
 #include <QObject>
@@ -18,7 +18,7 @@
  * Ouverture des fichiers de sauvegarde
  *
  */
-class MainWidget;
+class Server;
 class SaveManager : public QObject {
     Q_OBJECT
 public:
@@ -31,7 +31,7 @@ public:
     SongData load(const QString name);
 
     // Utilisé pour sauvegarder les paramètres de vol / pan..
-    void save(const QString name, MainWidget* manager);
+    void save(const QString name, Server* manager);
 
 signals:
     void send_liste_name(const char *list);

@@ -1,6 +1,6 @@
 #ifndef GRAPHICALTIMECOUNT_H
 #define GRAPHICALTIMECOUNT_H
-
+/*
 #include <QWidget>
 #include <QPainter>
 class GraphicalTimeCount : public QWidget {
@@ -62,5 +62,5 @@ private:
     int denominateur {4};
 
 };
-
+*/
 #endif // GRAPHICALTIMECOUNT_H
