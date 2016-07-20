@@ -1,5 +1,10 @@
 #include "SaveManager.h"
 
+/**
+ * @file SaveManager.cpp
+ * @brief File saving implementation
+ */
+
 #include "Server.h"
 
 SaveManager::SaveManager(QObject *parent) :
@@ -7,15 +12,14 @@ SaveManager::SaveManager(QObject *parent) :
 }
 
 SongData SaveManager::load(const QString loadpath) {
-    //// Création d'un dossier temporaire ////
+    //// Temp. dir creation ////
     tempdir.reset(new QTemporaryDir);
 
-    //// Extraction de l'archive dans le dossier temp ////
+    //// Archive extraction to tempdir ////
     KZip archive(loadpath);
 
-    if (!archive.open(QIODevice::ReadOnly)) {
-        throw std::runtime_error("Fichier invalide.");
-    }
+    if (!archive.open(QIODevice::ReadOnly))
+        throw std::runtime_error(tr("Invalid file"));
 
     const KArchiveDirectory *root = archive.directory();
 
@@ -23,19 +27,19 @@ SongData SaveManager::load(const QString loadpath) {
 
     archive.close();
 
-    //// Lecture des données
-    // On cherche le .ini :
+    //// Data reading
+    // Looking for .ini :
     QStringList nameFilter("*.ini");
     QDir directory(tempdir->path());
     QString iniFile = tempdir->path() + "/" + directory.entryList(nameFilter).first();
 
-    //// Chargement
+    //// Loading
     QSettings settings(iniFile, QSettings::IniFormat);
     SongData sd;
 
     int count = settings.value("General/trackCount").toInt();
-    sd.tempo  = settings.value("General/tempo").toInt();
-    sd.name   = settings.value("General/songName").toString().toStdString();
+    sd.tempo = settings.value("General/tempo").toInt();
+    sd.name = settings.value("General/songName").toString().toStdString();
     sd.sigNumerateur = settings.value("General/sigNumerator").toInt();
     sd.sigDenominateur = settings.value("General/sigDenominator").toInt();
 
@@ -48,26 +52,28 @@ SongData SaveManager::load(const QString loadpath) {
                                (tempdir->path() + "/" + settings.value(QString("Track%1/filename").arg(i)).toString()).toStdString(),
                                settings.value(QString("Track%1/volume").arg(i)).toInt(),
                                settings.value(QString("Track%1/pan").arg(i)).toInt());
+
         QString track_name = settings.value(QString("Track%1/name").arg(i)).toString();
         temp = temp + track_name;
         t++;
-        if (t != count) {
+
+        if (t != count)
             temp = temp + "|";
-        }
-        if (i == count-1) {
+
+        if (i == count-1)
             end=true;
-        }
     }
 
     if(end) {
         QByteArray TrackName = temp.toUtf8();
         emit updatedTracksList(TrackName.data());
     }
+
     return sd;
 }
 
 void SaveManager::save(const QString savepath, Server* manager) {
-    //// Ouverture du fichier .ini dans le dossier temporaire
+    //// Opening of .ini file in tempdir
     QStringList nameFilter("*.ini");
     QDir directory(tempdir->path());
     QString iniFile = tempdir->path() + "/" + directory.entryList(nameFilter).first();
@@ -77,19 +83,16 @@ void SaveManager::save(const QString savepath, Server* manager) {
     int count = settings.value("General/trackCount").toInt();
 
     for(int i = 0; i < count; ++ i) {
-        //settings.setValue(QString("Track%1/volume").arg(i), manager->ui->channelList->channels[i]->ui->volume->value());
-        //settings.setValue(QString("Track%1/pan").arg(i), manager->ui->channelList->channels[i]->ui->pan->value());
         settings.setValue(QString("Track%1/volume").arg(i), manager->player.getTrack(i)->getVolume());
         settings.setValue(QString("Track%1/pan").arg(i), manager->player.getTrack(i)->getPan());
     }
 
     settings.sync();
 
-    //// Écriture dans l'archive
     KZip archive(savepath);
 
     if (!archive.open(QIODevice::ReadWrite)) {
-        throw std::runtime_error("Fichier invalide.");
+        throw std::runtime_error(tr("Invalid file"));
     }
 
     archive.addLocalFile(iniFile, directory.entryList(nameFilter).first());

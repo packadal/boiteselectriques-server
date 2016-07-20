@@ -1,4 +1,10 @@
 #include "PlayThread.h"
+
+/**
+ * @file PlayThread.h
+ * @brief Audio player implementation
+ */
+
 #include "Track.h"
 
 #include <io/SfxInputProxy.h>
@@ -67,7 +73,7 @@ void PlayThread::stop() {
     isPlaying = false;
 }
 
-bool PlayThread::isStopped() {
+bool PlayThread::isStopped() const {
     return !isPlaying;
 }
 
@@ -106,7 +112,7 @@ void PlayThread::switchBox(const unsigned int track) {
     tracks[track]->setActivated(!tracks[track]->isActivated());
 }
 
-void PlayThread::setThreshold(const int threshold){
+void PlayThread::setThreshold(const unsigned int threshold){
     m_threshold = (99 -  threshold) * 4 + 100;
 }
 

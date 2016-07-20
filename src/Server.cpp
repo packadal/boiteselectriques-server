@@ -25,7 +25,7 @@ Server::Server() {
 
     connect(&player,	&PlayThread::songLoaded,
             this,		&Server::onSongLoaded);
-    connect(&saveManager,	&SaveManager::send_liste_name,
+    connect(&saveManager,	&SaveManager::updatedTracksList,
             this,		&Server::updateTrackList);
 
     connect(&serialManager,	&SerialManager::boxActivated,
@@ -91,19 +91,19 @@ int Server::getTempo() const {
     return m_tempo;
 }
 
-int Server::getThreshold() {
+unsigned int Server::getThreshold() const {
     return 99 - (player.getThreshold()-100)/4;
 }
 
-void Server::sendReady(bool i) {
-    sendMsgReady(i);
+void Server::sendReady(bool isReady) {
+    sendMsgReady(isReady);
 }
 
-void Server::sendTracksCount(int i) {
+void Server::sendTracksCount(unsigned int i) {
     sendMsgTracksCount(i);
 }
 
-void Server::sendBoxActivation(int i, int val) {
+void Server::sendBoxActivation(unsigned int i, int val) {
     if(val >= player.getThreshold()){
         sendMsgBoxActivation(i);
     }
@@ -296,7 +296,7 @@ void Server::updateBeatCount(double t) { // in seconds
     m_previousBeat = -1;
 }
 
-void Server::onSongLoaded(int on,int max) {
+void Server::onSongLoaded(unsigned int on, unsigned int max) {
     if (on == max)
         sendReady(true);
 }
@@ -305,7 +305,7 @@ void Server::updateTrackList(const char *list) {
     sendMsgTracksList(list);
 }
 
-void Server::setTempo(int arg) {
+void Server::setTempo(unsigned int arg) {
     m_tempo = arg;
 }
 
@@ -313,7 +313,7 @@ void Server::sendMsgThreshold(int boxSensor) {
     sender.send(osc::MessageGenerator()("/box/sensor", boxSensor));
 }
 
-void Server::sendMsgBoxActivation(int chan) {
+void Server::sendMsgBoxActivation(unsigned int chan) {
     sender.send(osc::MessageGenerator()("/box/enable_out", chan));
 }
 
@@ -321,11 +321,11 @@ void Server::sendMsgActivatedTracks(int val) {
     sender.send(osc::MessageGenerator()("/box/enable_sync", val));
 }
 
-void Server::sendMsgBeatCount(int beat) {
+void Server::sendMsgBeatCount(unsigned int beat) {
     sender.send(osc::MessageGenerator()("/box/beat", beat));
 }
 
-void Server::sendMsgPlay(int tempo) {
+void Server::sendMsgPlay(unsigned int tempo) {
     sender.send(osc::MessageGenerator()("/box/play", tempo));
 }
 
@@ -337,7 +337,7 @@ void Server::sendMsgSongsList(const char *list) {
     sender.send(osc::MessageGenerator()("/box/songs_list", list));
 }
 
-void Server::sendMsgTracksCount(int num) {
+void Server::sendMsgTracksCount(unsigned int num) {
     sender.send(osc::MessageGenerator()("/box/tracks_count", num));
 }
 

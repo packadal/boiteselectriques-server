@@ -64,7 +64,7 @@ public:
      * @brief Give the playing status
      * @return true if the playing is stopped, false else
      */
-    bool isStopped();
+    bool isStopped() const;
 
 signals:
     /**
@@ -107,19 +107,19 @@ public slots:
      * @brief Master volume setter
      * @param vol New volume (between 0 and 100)
      */
-    void setMasterVolume(const int vol);
+    void setMasterVolume(const unsigned int vol);
     /**
      * @brief Track volume setter
      * @param track Related track number
      * @param vol New volume (between 0 and 100)
      */
-    void setVolume(const int track, const int vol);
+    void setVolume(const unsigned int track, const unsigned int vol);
     /**
      * @brief Track pan setter
      * @param track Related track number
      * @param pan New pan value (between -100 and 100)
      */
-    void setPan(const int track, const int pan);
+    void setPan(const unsigned int track, const int pan);
     /**
      * @brief (Un)Mute a track
      * @param track Related track number
@@ -127,14 +127,14 @@ public slots:
      *
      * Mute a given track with doMute = true, unmute it else
      */
-    void setMute(const int track, const bool doMute);
+    void setMute(const unsigned int track, const bool doMute);
 
     /**
      * @brief Change the solo state of a track
      * @param track Related track number
      * @param state New solo state
      */
-    void solo(const int track, const bool state);
+    void solo(const unsigned int track, const bool state);
 
     /**
      * @brief Reset the song to its default values
@@ -158,7 +158,7 @@ public slots:
      * @brief Threshold setter
      * @param "New" (not raw) threshold value (0-100)
      */
-    void setThreshold(const int threshold);
+    void setThreshold(const unsigned int threshold);
 
     /**
      * @brief Reset threshold to its default value

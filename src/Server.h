@@ -69,7 +69,7 @@ private:
      * @brief Notify the client of a box activation
      * @param Track number
      */
-    void sendMsgBoxActivation(int chan);
+    void sendMsgBoxActivation(unsigned int chan);
     /**
      * @brief Send the activated tracks' numbers to the client
      * @param val Activated tracks
@@ -81,12 +81,12 @@ private:
      * @brief Send the actual beat count
      * @param beat Beat count
      */
-    void sendMsgBeatCount(int beat);
+    void sendMsgBeatCount(unsigned int beat);
     /**
      * @brief Notify the client of the song's playing start
      * @param tempo Song's tempo
      */
-    void sendMsgPlay(int tempo);
+    void sendMsgPlay(unsigned int tempo);
     /**
      * @brief Send the actual song's title
      * @param title Song's title
@@ -101,7 +101,7 @@ private:
      * @brief Send the song's number of tracks
      * @param num Count of tracks
      */
-    void sendMsgTracksCount(int num);
+    void sendMsgTracksCount(unsigned int num);
     /**
      * @brief Send the song's track list
      * @param list Tracks list
@@ -219,6 +219,13 @@ public:
      * @return Tempo value
      */
     int getTempo() const;
+
+    /**
+     * @brief Calculate the threshold value
+     * @return Threshold value to transmit
+     */
+    unsigned int getThreshold() const;
+
 signals:
     /**
      * @brief Notify the need to reload the actual song
@@ -236,12 +243,6 @@ signals:
 
 public slots:
     /**
-     * @brief Calculate the threshold value
-     * @return Threshold value to transmit
-     */
-    int getThreshold();
-
-    /**
      * @brief Reset the values to default
      */
     void reset();
@@ -251,7 +252,7 @@ public slots:
      * @param i Track number
      * @param val Sensor value (to validate the action)
      */
-    void switchBox(int i, int val);
+    void switchBox(unsigned int i, int val);
 
     /**
      * @brief Play the song
@@ -291,7 +292,7 @@ public slots:
      * @param on Next track number
      * @param max Max track number
      */
-    void onSongLoaded(int on, int max);
+    void onSongLoaded(unsigned int on, unsigned int max);
 
     /**
      * @brief Update the client's track list
@@ -303,7 +304,7 @@ public slots:
      * @brief Tempo setter
      * @param arg New tempo value
      */
-    void setTempo(int arg);
+    void setTempo(unsigned int arg);
 
 
     /***************************
@@ -317,12 +318,12 @@ public slots:
      * @param i Track (box) number
      * @param val Sensor value
      */
-    void sendBoxActivation(int i, int val);
+    void sendBoxActivation(unsigned int i, int val);
     /**
      * @brief Send the actual beat count
      * @param beat Beat count
      */
-    void sendBeatCount(int beat);
+    void sendBeatCount(unsigned int beat);
     /**
      * @brief Send the actual song's title
      * @param title Song's title
@@ -337,14 +338,14 @@ public slots:
      * @brief Send the song's number of tracks
      * @param num Count of tracks
      */
-    void sendTracksCount(int num);
+    void sendTracksCount(unsigned int num);
     /**
      * @brief Notify the client of the loading state
      * @param isReady Server's loading state
      *
      * Send true if all the songs are loaded, false else
      */
-    void sendReady(bool);
+    void sendReady(bool isReady);
 };
 
 #endif // SERVER_H
