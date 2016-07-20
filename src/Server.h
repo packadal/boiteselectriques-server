@@ -14,32 +14,107 @@
 #include "osc/oscsender.h"
 #include "osc/oscmessagegenerator.h"
 
-#include <QWidget>
-#include <QFileDialog>
-#include <QMessageBox>
 #include <exception>
 
 class SaveManager;
+
+#define EXPORT_FOLDER "/home/ubuntu/songs/"
+#define FILES_EXTENSION "*.song"
+#define FILES_JOIN_CHAR "|"
 
 /**
  * @brief Main class
  *
  * Handles the events and dispatch the corresponding actions
  */
-class Server : public QWidget {
+class Server : public QObject {
     Q_OBJECT
     Q_PROPERTY(int tempo READ getTempo WRITE setTempo)
 
     friend class SaveManager;
-public:
-    explicit Server(QWidget *parent = 0);
-    ~Server();
+
+private:
+    PlayThread player; /*< Audio play manager */
+    SaveManager saveManager; /*< File handling manager */
+    SerialManager serialManager {this}; /*< Interface with serial port */
+
+    SongData song; /*< Actual song's data */
+    QString selSong; /*< Selected song's name */
+    int threshold;
+    int nbChannels;
+    QString currentFile {};
+
+    bool m_loaded {false}; /*< Indicate if a song has been loaded */
+    bool m_playing {false}; /*< Indicate if a song is playing */
+
+    int m_tempo {};
+    double m_beatCount {};
+    // Optimization : Comparison with the previous beat
+    int m_previousBeat {-1};
+
+
+    OscReceiver receiver {9988}; /*< Receiving interface with OSC protocol */
+    OscSender sender {"192.170.0.17", 9989}; /*< Sending interface with OSC protocol */
+
+    /***************************
+     * TRANSMISSIONS TO CLIENT *
+     ***************************/
+
+    // Only send the corresponding data using OSC protocol
 
     /**
-     * @brief Tempo getter
-     * @return Tempo value
+     * @brief Send the actual threshold value to the client
+     * @param (Calculated) Threshold value (obtained with getThreshold() )
      */
-    int getTempo() const;
+    void sendMsgThreshold(int boxSensor);
+    /**
+     * @brief Notify the client of a box activation
+     * @param Track number
+     */
+    void sendMsgBoxActivation(int chan);
+    /**
+     * @brief Send the activated tracks' numbers to the client
+     * @param val Activated tracks
+     *
+     * Called each 8 beats, to keep the client synchronized
+     */
+    void sendMsgActivatedTracks(int val);
+    /**
+     * @brief Send the actual beat count
+     * @param beat Beat count
+     */
+    void sendMsgBeatCount(int beat);
+    /**
+     * @brief Notify the client of the song's playing start
+     * @param tempo Song's tempo
+     */
+    void sendMsgPlay(int tempo);
+    /**
+     * @brief Send the actual song's title
+     * @param title Song's title
+     */
+    void sendMsgSongTitle(const char *title);
+    /**
+     * @brief Send the available songs' list
+     * @param list Songs' titles list
+     */
+    void sendMsgSongsList(const char *list);
+    /**
+     * @brief Send the song's number of tracks
+     * @param num Count of tracks
+     */
+    void sendMsgTracksCount(int num);
+    /**
+     * @brief Send the song's track list
+     * @param list Tracks list
+     */
+    void sendMsgTracksList(const char *list);
+    /**
+     * @brief Notify the client of the loading state
+     * @param isReady Server's loading state
+     */
+    void sendMsgReady(bool sendMsgReady);
+
 
     /*******************
      * EVENTS HANDLING *
@@ -47,7 +122,7 @@ public:
 
     /**
      * @brief update_threshold event handling
-     * @param args Event New threshold value
+     * @param args New threshold value
      *
      * Change the threshold value
      */
@@ -137,10 +212,28 @@ public:
      */
     void handle__box_selectSong(osc::ReceivedMessageArgumentStream args);
 
+public:
+    explicit Server();
+    ~Server();
+
+    /**
+     * @brief Tempo getter
+     * @return Tempo value
+     */
+    int getTempo() const;
 signals:
-    //void select_Song(const char *);
+    /**
+     * @brief Notify the need to reload the actual song
+     */
     void actionLoad();
-    void updateThreshold(int);
+    /**
+     * @brief Notify of a new threshold value
+     * @param threshold New threshold value
+     */
+    void updateThreshold(int threshold);
+    /**
+     * @brief Notify the threshold reset
+     */
     void resetThreshold();
 
 public slots:
@@ -158,7 +251,7 @@ public slots:
     /**
      * @brief Change a track status
      * @param i Track number
-     * @param val Sensibility value (to validate the action)
+     * @param val Sensor value (to validate the action)
      */
     void switchBox(int i, int val);
 
@@ -216,106 +309,44 @@ public slots:
 
 
     /***************************
-     * TRANSMISSIONS TO TABLET *
+     * TRANSMISSIONS TO CLIENT *
      ***************************/
 
+    // Perform eventual calculations and then call the private sending functions
+
     /**
-     * @brief Send the actual threshold value to the client
-     * @param (Calculated) Threshold value (obtained with getThreshold() )
+     * @brief Notify the client of the activation of a box
+     * @param i Track (box) number
+     * @param val Sensor value
      */
-    void sendThreshold(int boxSensor);
-    /**
-     * @brief Notify the client of a box activation
-     * @param Track number
-     */
-    void sendBoxActivation(int chan);
-    /**
-     * @brief Send the activated tracks' numbers to the client
-     * @param val Activated tracks
-     *
-     * Called each 8 beats, to keep the client synchronized
-     */
-    void sendActivatedTracks(int val);
+    void sendBoxActivation(int i, int val);
     /**
      * @brief Send the actual beat count
      * @param beat Beat count
      */
     void sendBeatCount(int beat);
     /**
-     * @brief Notify the client of the song's playing start
-     * @param tempo Song's tempo
-     */
-    void sendPlay(int tempo);
-    /**
      * @brief Send the actual song's title
      * @param title Song's title
      */
-    void sendSongTitle(const char *title);
+    void sendSongTitle(const char* title);
     /**
      * @brief Send the available songs' list
      * @param list Songs' titles list
      */
-    void sendSongsList(const char *list);
+    void sendSongsList(const char* list);
     /**
      * @brief Send the song's number of tracks
      * @param num Count of tracks
      */
     void sendTracksCount(int num);
     /**
-     * @brief Send the song's track list
-     * @param list Tracks list
-     */
-    void sendTrackList(const char *list);
-    /**
      * @brief Notify the client of the loading state
      * @param isReady Server's loading state
      *
      * Send true if all the songs are loaded, false else
      */
-    void ready(bool ready) {
-        sender.send(osc::MessageGenerator()("/box/ready_to_go", ready));
-    }
-
-    //envoi sur tablette
-    void send_Boite(int,int);
-    void send_Beat(int);
-    void send_Titre(const char *);
-    void send_Liste(const char *);
-    void send_numb_track(int);
-    void send_go(bool);
-
-
-private:
-    //Ui::MainWidget *ui;
-    PlayThread playThread;
-    SaveManager savemanager;
-    SerialManager serialmanager {this};
-    //ConfigurationDialog confdialog {this};
-    OscReceiver oscReceiver {9988};
-
-    SongData song;
-
-    QString selSong;
-
-    int threshold;
-    int nbChannels;
-
-    QString currentFile {};
-
-    int m_tempo {};
-    double m_beatCount {};
-
-    // Optimisation : on compare avec le temps précédent.
-    int m_previousBeat {-1};
-
-    // Indique si un morceau a été chargé.
-    bool m_loaded {false};
-
-    // Indique si un morceau est en cours de lecture
-    bool m_playing {false};
-
-    OscSender sender {"192.170.0.17", 9989};
-
+    void sendReady(bool);
 };
 
 #endif // SERVER_H

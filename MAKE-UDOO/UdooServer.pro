@@ -17,15 +17,13 @@ QMAKE_CXXFLAGS_DEBUG -= -O2
 QMAKE_CXXFLAGS_DEBUG += -O0 -Wno-unknown-pragmas
 
 SOURCES += main.cpp\
-        MainWindow.cpp \
-	MainWidget.cpp \
+	Server.cpp \
         Track.cpp \
 	PlayThread.cpp \
 	SaveManager.cpp \
         SerialManager.cpp
 
-HEADERS += MainWindow.h \
-	MainWidget.h \
+HEADERS += Server.h \
 	Track.h \
 	PlayThread.h \
         SongData.h \

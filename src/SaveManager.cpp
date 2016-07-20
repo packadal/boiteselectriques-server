@@ -79,8 +79,8 @@ void SaveManager::save(const QString savepath, Server* manager) {
     for(int i = 0; i < count; ++ i) {
         //settings.setValue(QString("Track%1/volume").arg(i), manager->ui->channelList->channels[i]->ui->volume->value());
         //settings.setValue(QString("Track%1/pan").arg(i), manager->ui->channelList->channels[i]->ui->pan->value());
-        settings.setValue(QString("Track%1/volume").arg(i), manager->playThread.getTrack(i)->getVolume());
-        settings.setValue(QString("Track%1/pan").arg(i), manager->playThread.getTrack(i)->getPan());
+        settings.setValue(QString("Track%1/volume").arg(i), manager->player.getTrack(i)->getVolume());
+        settings.setValue(QString("Track%1/pan").arg(i), manager->player.getTrack(i)->getPan());
     }
 
     settings.sync();
