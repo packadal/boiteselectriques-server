@@ -4,6 +4,11 @@
 #include "SongData.h"
 //#include "ChannelWidget.h"
 
+/**
+ * @file SaveManager.h
+ * @brief File saving interface
+ */
+
 #include <QFileInfo>
 #include <QObject>
 #include <QSettings>
@@ -12,29 +17,46 @@
 #include <memory>
 #include <KF5/KArchive/KZip>
 
+class Server;
+
 /**
  * @brief The SaveManager class
  *
- * Ouverture des fichiers de sauvegarde
+ * File saving handling
  *
  */
-class Server;
 class SaveManager : public QObject {
     Q_OBJECT
+
 public:
+    /**
+     * @brief SaveManager constructor
+     * @param parent Parent object (facultative)
+     */
     explicit SaveManager(QObject *parent = 0);
 
-    // Dossier temporaire ou sont extraits les données contenues dans les fichiers .song
-    std::shared_ptr<QTemporaryDir> tempdir {};
+    std::shared_ptr<QTemporaryDir> tempdir {}; /*< Temp. directory where .song files' data are extracted */
 
-    // Charge un fichier
+    /**
+     * @brief Load a file
+     * @param name Filename
+     * @return Corresponding song data
+     */
     SongData load(const QString name);
 
-    // Utilisé pour sauvegarder les paramètres de vol / pan..
+    /**
+     * @brief Save the parameters (volume, pan, ...)
+     * @param name Filename
+     * @param manager Audio server manager (pointer)
+     */
     void save(const QString name, Server* manager);
 
 signals:
-    void send_liste_name(const char *list);
+    /**
+     * @brief Notify of a new tracks list
+     * @param list Tracks list
+     */
+    void updatedTracksList(const char *list);
 
 };
 

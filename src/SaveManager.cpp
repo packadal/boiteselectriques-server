@@ -61,7 +61,7 @@ SongData SaveManager::load(const QString loadpath) {
 
     if(end) {
         QByteArray TrackName = temp.toUtf8();
-        emit send_liste_name(TrackName.data());
+        emit updatedTracksList(TrackName.data());
     }
     return sd;
 }
