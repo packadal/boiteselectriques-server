@@ -1,6 +1,12 @@
 #include "Server.h"
 
+/**
+ * @file Server.cpp
+ * @brief Server implementation
+ */
+
 #include <QDebug>
+#include <exception>
 
 Server::Server() {
 
@@ -12,13 +18,13 @@ Server::Server() {
     connect(this, &Server::resetThreshold,
             &player, &PlayThread::resetThreshold);
 
-    connect(&player,	&PlayThread::spentTime,
+    connect(&player,	&PlayThread::actualBeatChanged,
             this,		&Server::updateBeat);
-    connect(&player,	&PlayThread::setTotalTime,
+    connect(&player,	&PlayThread::beatCountChanged,
             this,		&Server::updateBeatCount);
 
-    connect(&player,	&PlayThread::charged,
-            this,		&Server::onIsLoaded);
+    connect(&player,	&PlayThread::songLoaded,
+            this,		&Server::onSongLoaded);
     connect(&saveManager,	&SaveManager::send_liste_name,
             this,		&Server::updateTrackList);
 
@@ -290,7 +296,7 @@ void Server::updateBeatCount(double t) { // in seconds
     m_previousBeat = -1;
 }
 
-void Server::onIsLoaded(int on,int max) {
+void Server::onSongLoaded(int on,int max) {
     if (on == max)
         sendReady(true);
 }
@@ -373,7 +379,7 @@ int Server::load() {
                 const char *c_title = title.data();
                 sendSongTitle(c_title);
 
-                sendTracksCount(player.tracksCount());
+                sendTracksCount(player.getTracksCount());
 
                 return 0;
             }

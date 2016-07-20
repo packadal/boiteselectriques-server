@@ -1,7 +1,13 @@
 #ifndef PLAYTHREAD_H
 #define PLAYTHREAD_H
 
+/**
+ * @file PlayThread.h
+ * @brief Audio player interface
+ */
+
 #define DEFAULT_THRESHOLD 200
+#define DEFAULT_MASTER_VOLUME 50
 
 #include "SongData.h"
 #include "Track.h"
@@ -25,161 +31,160 @@ class StreamingManager;
 /**
  * @brief The PlayThread class
  *
- * Classe qui fait la liaison avec le moteur audio
+ * Liaison with the audio engine
  */
 class PlayThread : public QThread {
     Q_OBJECT
 public:
-    explicit PlayThread(QObject *parent = 0);
+    explicit PlayThread();
 
-    unsigned int tracksCount() const {
-        return tracks.size();
-    }
-    Track* getTrack(const unsigned int track){
-        return tracks[track];
-    }
+    /**
+     * @brief Give the number of the song's tracks
+     * @return Tracks count of the current song
+     */
+    unsigned int getTracksCount() const;
+    /**
+     * @brief Access a track from its number
+     * @param track Track number
+     * @return Pointer to the asked Track
+     */
+    Track* getTrack(const unsigned int track);
+    /**
+     * @brief Give the number tracks currently active
+     * @return Count of activated tracks
+     */
+    int getActivatedTracks() const;
+    /**
+     * @brief Threshold getter
+     * @return Raw threshold value
+     */
+    int getThreshold() const;
 
-    int getActivatedTracks() const{
-        int res= 0;
-        for(int i= 0; i<tracks.size(); i++)
-            if(tracks[i]->isActivated())
-                res+= pow(2,i);
-        return res;
-    }
-
-    int getThreshold() const {
-        return m_threshold;
-    }
+    /**
+     * @brief Give the playing status
+     * @return true if the playing is stopped, false else
+     */
+    bool isStopped();
 
 signals:
-    void spentTime(double);
-    void setTotalTime(double);
-    void muteChanged(int, bool);
-    // quand le morceau es chargé
-    void charged(int,int);
+    /**
+     * @brief Notify of the modification of the actual beat value
+     * @param time Actual time (seconds)
+     */
+    void actualBeatChanged(double time);
+    /**
+     * @brief Notify of the total beat count modification
+     * @param time Actual time (seconds)
+     *
+     * For example, called when a new song is loaded
+     */
+    void beatCountChanged(double time);
+    /**
+     * @brief Notify of the mute value modification
+     * @param box Related track number
+     * @param state New state
+     */
+    void muteChanged(int box, bool state);
+    /**
+     * @brief Notify of the song loading end
+     * @param on Next track number
+     * @param max Max track number
+     */
+    void songLoaded(int,int);
 
 public slots:
-    // A appeler quand on veut faire lecture
+    /**
+     * @brief Play the song
+     */
     void run();
 
-    // Volume principal
-    // Entre 0 et 100
-    void setMasterVolume(const int vol) {
-        masterVolume->setGain(vol / 10.0);
-    }
-
-    // Volume par canal
-    // Entre 0 et 100
-    void setVolume(const int track, const int vol) {
-        //volumes[track]->setGain(vol / 100.0);
-        tracks[track]->setVolume(vol);
-    }
-
-    // Pan
-    // Entre -100 et 100
-    void setPan(const int track, const int pan) {
-        //pans[track]->setPan(pan / 100.0);
-        tracks[track]->setPan(pan);
-    }
-
-    // Sourdine d'un canal
-    void setMute(const int track, const bool doMute) {
-        //doMute? mutes[track]->mute() : mutes[track]->unmute();
-        qDebug() << "THREAD::SET_MUTE" << track << (doMute ? "TRUE" : "FALSE");
-        tracks[track]->setMute(doMute);
-    }
-
-    // Appelé régulièrement pour mettre à jour le beat ou on se trouve
-    // dans l'interface
-    void timeHandle() {
-        if(++bufferCount > maxBufferCount) bufferCount = 0;
-        emit spentTime(bufferCount * conf.bufferSize / double(conf.samplingRate));
-    }
-
-    // Charge un morceau dans le moteur
-    void load(const SongData& s);
-
-    // Arrête la lecture
+    /**
+     * @brief Stop the playing
+     */
     void stop();
 
-    bool isStopped() {
-        return !isPlaying;
-    }
+    /**
+     * @brief Master volume setter
+     * @param vol New volume (between 0 and 100)
+     */
+    void setMasterVolume(const int vol);
+    /**
+     * @brief Track volume setter
+     * @param track Related track number
+     * @param vol New volume (between 0 and 100)
+     */
+    void setVolume(const int track, const int vol);
+    /**
+     * @brief Track pan setter
+     * @param track Related track number
+     * @param pan New pan value (between -100 and 100)
+     */
+    void setPan(const int track, const int pan);
+    /**
+     * @brief (Un)Mute a track
+     * @param track Related track number
+     * @param doMute New mute state
+     *
+     * Mute a given track with doMute = true, unmute it else
+     */
+    void setMute(const int track, const bool doMute);
 
-    void reset() {
-        setMasterVolume(50);
-        for(int i=0; i<tracks.size(); i++)
-            tracks[i]->reset();
-    }
+    /**
+     * @brief Change the solo state of a track
+     * @param track Related track number
+     * @param state New solo state
+     */
+    void solo(const int track, const bool state);
 
-    void solo(const int box, const bool state) {
-        qDebug() << "PLAYTHREAD::SOLO" << box << (state ? "TRUE" : "FALSE");
-        if(box < tracks.size())
-            tracks[box]->setSolo(state);
+    /**
+     * @brief Reset the song to its default values
+     */
+    void reset();
 
-        if(state) {
-            tracks[box]->setMute(false);
+    /**
+     * @brief Called when the activated status of a track is changed
+     * @param enabled New activation status
+     * @param track Related track number
+     */
+    void onEnablementChanged(bool enabled, int track);
 
-            qDebug() << "TO_MUTE:";
-            for(int i=0; i<tracks.size(); i++)
-                if(!tracks[i]->isSolo()){
-                    qDebug() << "MUTE->" << i;
-                    tracks[i]->setMute(true);
-                }
-        } else {
-            qDebug() << "UNMUTE ?";
+    /**
+     * @brief Switch a box activation status
+     * @param track Related track number
+     */
+    void switchBox(const unsigned int track);
 
-            bool noMoreSolo = true;
-            for(int i=0; i<tracks.size() && noMoreSolo; i++)
-                if(tracks[i]->isSolo())
-                    noMoreSolo = false;
+    /**
+     * @brief Threshold setter
+     * @param "New" (not raw) threshold value (0-100)
+     */
+    void setThreshold(const int threshold);
 
-            if(noMoreSolo)
-            {
-                qDebug() << "UNMUTE :";
-                for(int i=0; i<tracks.size(); i++)
-                {
-                    qDebug() << "UNMUTE->" << i;
-                    tracks[i]->setMute( !tracks[i]->isActivated() );
-                }
-            } else
-                tracks[box]->setMute( true );
-        }
-    }
+    /**
+     * @brief Reset threshold to its default value
+     */
+    void resetThreshold();
 
-    void switchBox(const unsigned int box) {
-        qDebug() << (tracks[box]->isActivated() ? "DES" : "") << "ACTIVATE";
-        tracks[box]->setActivated(!tracks[box]->isActivated());
-        qDebug() << "SWITCHED";
-    }
+    /**
+     * @brief Regularly called to update the beat value
+     */
+    void timeHandle();
 
-    void setThreshold(const int threshold){
-        qDebug() << "THREAD::SET_THRESHOLD" << threshold;
-        m_threshold = (99 -  threshold) * 4 + 100;
-        qDebug() << "NEW THRESHOLD" << m_threshold;
-    }
-
-    void resetThreshold() {
-        setThreshold(DEFAULT_THRESHOLD);
-    }
-
-    void on_enablementChanged(bool, int); // Bouton contrôlé par les boîtes
+    /**
+     * @brief Load a song in the engine
+     * @param s Song's informations
+     */
+    void load(const SongData& s);
 
 private:
-    Parameters<double> conf;
+    Parameters<double> conf; /*< Configuration data */
     std::shared_ptr<Amplify<double>> masterVolume {new Amplify<double>(conf)};
-    /*std::vector<std::shared_ptr<Amplify<double>>> volumes;
-    std::vector<std::shared_ptr<Pan<double>>> pans;
-    std::vector<std::shared_ptr<Mute<double>>> mutes;*/
     std::shared_ptr<StreamingManager<double>> manager;
 
-    QVector<Track*> tracks;
+    QVector<Track*> tracks; /*< List of the current song's tracks */
 
-    // Buffer auquel on se trouve
-    int bufferCount {};
-
-    // Nombre de buffers total dans une boucle
-    int maxBufferCount {};
+    int bufferCount {}; /*< Buffer in which we are s*/
+    int maxBufferCount {}; /*< Total buffer count in a loop */
 
     bool isPlaying {false};
     int m_threshold {DEFAULT_THRESHOLD};

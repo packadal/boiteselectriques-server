@@ -2,7 +2,7 @@
 #define SERVER_H
 
 /**
- * @file Server
+ * @file Server.h
  * @brief Server interface
  */
 
@@ -13,8 +13,6 @@
 #include "osc/oscreceiver.h"
 #include "osc/oscsender.h"
 #include "osc/oscmessagegenerator.h"
-
-#include <exception>
 
 class SaveManager;
 
@@ -277,13 +275,13 @@ public slots:
     void stop();
 
     /**
-     * @brief Update the beat value
+     * @brief Update the actual beat value
      * @param t Actual time (in seconds)
      */
     void updateBeat(double t);
 
     /**
-     * @brief Update the beat count
+     * @brief Update the total beat count
      * @param t Actual time (in seconds)
      */
     void updateBeatCount(double t);
@@ -293,7 +291,7 @@ public slots:
      * @param on Next track number
      * @param max Max track number
      */
-    void onIsLoaded(int on, int max);
+    void onSongLoaded(int on, int max);
 
     /**
      * @brief Update the client's track list
