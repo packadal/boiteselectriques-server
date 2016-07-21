@@ -1,10 +1,17 @@
 #ifndef SONGDATA_H
 #define SONGDATA_H
 
+/**
+ * @file SongData.h
+ * @brief Song informations representation
+ */
+
 #include <string>
 #include <vector>
 
-// Information d'une piste
+/**
+ * @brief Informations of a track
+ */
 struct TrackData {
     TrackData() = default;
     TrackData(TrackData&&) = default;
@@ -24,22 +31,24 @@ struct TrackData {
     TrackData& operator=(TrackData&&) = default;
     TrackData& operator=(const TrackData&) = delete;
     const std::string name {};
-    const std::string file {};
+    const std::string file {}; /*< Track's file name */
     const double volume {};
     const double pan {};
 };
 
-// Information pour le morceau entier
+/**
+ * @brief Informations of the whole song
+ */
 struct SongData {
     SongData() = default;
     SongData(SongData&&) = default;
     SongData& operator=(SongData&&) = default;
 
-    std::vector<TrackData> tracks {};
+    std::vector<TrackData> tracks {}; /*< Song's list of tracks */
     int tempo {};
     std::string name {};
-    int sigNumerateur {};
-    int sigDenominateur {};
+    int sigNumerator {};
+    int sigDenominator {};
 };
 
 #endif // SONGDATA_H
