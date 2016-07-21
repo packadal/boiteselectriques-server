@@ -136,7 +136,7 @@ void PlayThread::load(const SongData& s) {
 #pragma omp parallel for
     for(int i = 0; i < track_count; i++) {
         Track* t = new Track(s.tracks[i], conf, i);
-        connect(t, &Track::on_enable,
+        connect(t, &Track::onActivationSwitch(),
                 this, &PlayThread::onEnablementChanged);
         tracks[i] = t;
 
@@ -145,7 +145,7 @@ void PlayThread::load(const SongData& s) {
         emit beatCountChanged(file->v(0).size() / double(conf.samplingRate));
 
         chains[i] = Input_p(new SfxInputProxy<double>(new StereoAdapter<double>(new LoopInputProxy<double>(file)),
-                            new Sequence<double>(conf, tracks[i]->getVolumePtr(), tracks[i]->getPanPtr(), tracks[i]->isMute() )));
+                            new Sequence<double>(conf, tracks[i]->getVolumePtr(), tracks[i]->getPanPtr(), tracks[i]->getMutePtr() )));
 
         emit songLoaded(i+1,track_count);
     }
