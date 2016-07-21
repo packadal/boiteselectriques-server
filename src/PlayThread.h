@@ -6,9 +6,6 @@
  * @brief Audio player interface
  */
 
-#define DEFAULT_THRESHOLD 200
-#define DEFAULT_MASTER_VOLUME 50
-
 #include "SongData.h"
 #include "Track.h"
 
@@ -27,6 +24,10 @@
 
 template<typename T>
 class StreamingManager;
+
+
+#define DEFAULT_THRESHOLD 200 /*< Default raw threshold value */
+#define DEFAULT_MASTER_VOLUME 50 /*< Default master volume value */
 
 /**
  * @brief The PlayThread class

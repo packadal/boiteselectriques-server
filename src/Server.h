@@ -16,9 +16,8 @@
 
 class SaveManager;
 
-#define EXPORT_FOLDER "/home/ubuntu/songs/"
-#define FILES_EXTENSION "*.song"
-#define FILES_JOIN_CHAR "|"
+#define EXPORT_FOLDER "/home/ubuntu/songs/" /*< Files save/load folder*/
+#define FILES_EXTENSION "*.song" /*< Song files extension */
 
 /**
  * @brief Main class

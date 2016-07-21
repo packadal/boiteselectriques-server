@@ -1,6 +1,11 @@
 #ifndef SERIALMANAGER_H
 #define SERIALMANAGER_H
 
+/**
+ * @file SerialManager.h
+ * @brief Serial port interface
+ */
+
 #include <QThread>
 #include <QString>
 #include <QStringList>
@@ -10,35 +15,43 @@
 #include <QDebug>
 
 class QSerialPort;
+
+
+#define SERIAL_PORT "ttymxc3" /*< Serial port to open */
+
 /**
  * @brief The SerialManager class
  *
- * Interface avec le port série, pour recevoir les messages de l'Arduino
+ * Serial port interface, to read the messages from the Arduino.
  */
 class SerialManager : public QThread {
     Q_OBJECT
 public:
-    SerialManager(QObject* parent = 0):
-        QThread(parent) {
-
-        qDebug() << "SerialManager";
-    }
+    SerialManager(QObject* parent = 0);
 
 signals:
-    // Envoyé lorsqu'une boite est activée
-    void boxActivated(int, int);
+    /**
+     * @brief Notify of a box activation
+     * @param box Related box number
+     * @param val Sensor value
+     */
+    void boxActivated(int box, int val);
 
 public slots:
-    void stop() {
-        finished = true;
-    }
+    /**
+     * @brief Stop the messages reading
+     */
+    void stop();
 
 protected:
+    /**
+     * @brief Start the messages reading
+     */
     virtual void run();
 
 private:
-    bool finished {false};
-    std::shared_ptr<QSerialPort> port;
+    bool finished {false}; /*< Status of the reading */
+    std::shared_ptr<QSerialPort> port; /*< Port to open */
 };
 
 #endif // SERIALMANAGER_H

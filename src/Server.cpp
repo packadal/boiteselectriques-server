@@ -354,7 +354,7 @@ int Server::load() {
 
     exportFolder.setNameFilters(QStringList()<<FILES_EXTENSION);
     QStringList fileList = exportFolder.entryList();
-    QString str = fileList.join(FILES_JOIN_CHAR);
+    QString str = fileList.join("|");
     QByteArray list = str.toLatin1();
     const char *c_list = list.data();
     sendSongsList(c_list);
