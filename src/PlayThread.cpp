@@ -136,7 +136,7 @@ void PlayThread::load(const SongData& s) {
 #pragma omp parallel for
     for(int i = 0; i < track_count; i++) {
         Track* t = new Track(s.tracks[i], conf, i);
-        connect(t, &Track::onActivationSwitch(),
+        connect(t, &Track::onActivationSwitch,
                 this, &PlayThread::onEnablementChanged);
         tracks[i] = t;
 

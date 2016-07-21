@@ -83,5 +83,5 @@ void Track::setSolo(const bool state) {
 
 void Track::notifyEnabled(bool enabled) {
     if(!m_soloState)
-        emit onActivationSwitch()(enabled, m_id);
+        emit onActivationSwitch(enabled, m_id);
 }

@@ -109,7 +109,7 @@ void Server::sendBoxActivation(unsigned int i, int val) {
     }
 }
 
-void Server::sendBeatCount(int i) {
+void Server::sendBeatCount(unsigned int i) {
     sendMsgBeatCount(i);
 }
 
@@ -244,7 +244,7 @@ void Server::reset() {
     player.reset();
 }
 
-void Server::switchBox(int i, int val) {
+void Server::switchBox(unsigned int i, int val) {
     if(val >= player.getThreshold()) {
         player.switchBox(i);
     }
@@ -313,7 +313,7 @@ void Server::sendMsgThreshold(int boxSensor) {
     sender.send(osc::MessageGenerator()("/box/sensor", boxSensor));
 }
 
-void Server::sendMsgBoxActivation(unsigned int chan) {
+void Server::sendMsgBoxActivation(int chan) {
     sender.send(osc::MessageGenerator()("/box/enable_out", chan));
 }
 
@@ -321,11 +321,11 @@ void Server::sendMsgActivatedTracks(int val) {
     sender.send(osc::MessageGenerator()("/box/enable_sync", val));
 }
 
-void Server::sendMsgBeatCount(unsigned int beat) {
+void Server::sendMsgBeatCount(int beat) {
     sender.send(osc::MessageGenerator()("/box/beat", beat));
 }
 
-void Server::sendMsgPlay(unsigned int tempo) {
+void Server::sendMsgPlay(int tempo) {
     sender.send(osc::MessageGenerator()("/box/play", tempo));
 }
 
@@ -337,7 +337,7 @@ void Server::sendMsgSongsList(const char *list) {
     sender.send(osc::MessageGenerator()("/box/songs_list", list));
 }
 
-void Server::sendMsgTracksCount(unsigned int num) {
+void Server::sendMsgTracksCount(int num) {
     sender.send(osc::MessageGenerator()("/box/tracks_count", num));
 }
 

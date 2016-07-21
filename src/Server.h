@@ -68,7 +68,7 @@ private:
      * @brief Notify the client of a box activation
      * @param Track number
      */
-    void sendMsgBoxActivation(unsigned int chan);
+    void sendMsgBoxActivation(int chan);
     /**
      * @brief Send the activated tracks' numbers to the client
      * @param val Activated tracks
@@ -80,12 +80,12 @@ private:
      * @brief Send the actual beat count
      * @param beat Beat count
      */
-    void sendMsgBeatCount(unsigned int beat);
+    void sendMsgBeatCount(int beat);
     /**
      * @brief Notify the client of the song's playing start
      * @param tempo Song's tempo
      */
-    void sendMsgPlay(unsigned int tempo);
+    void sendMsgPlay(int tempo);
     /**
      * @brief Send the actual song's title
      * @param title Song's title
@@ -100,7 +100,7 @@ private:
      * @brief Send the song's number of tracks
      * @param num Count of tracks
      */
-    void sendMsgTracksCount(unsigned int num);
+    void sendMsgTracksCount(int num);
     /**
      * @brief Send the song's track list
      * @param list Tracks list

@@ -5,6 +5,8 @@
  * @brief File saving implementation
  */
 
+#include <stdexcept>
+
 #include "Server.h"
 
 SaveManager::SaveManager(QObject *parent) :
@@ -19,7 +21,7 @@ SongData SaveManager::load(const QString loadpath) {
     KZip archive(loadpath);
 
     if (!archive.open(QIODevice::ReadOnly))
-        throw std::runtime_error(tr("Invalid file"));
+        throw std::runtime_error("Invalid file");
 
     const KArchiveDirectory *root = archive.directory();
 
@@ -92,7 +94,7 @@ void SaveManager::save(const QString savepath, Server* manager) {
     KZip archive(savepath);
 
     if (!archive.open(QIODevice::ReadWrite)) {
-        throw std::runtime_error(tr("Invalid file"));
+        throw std::runtime_error("Invalid file");
     }
 
     archive.addLocalFile(iniFile, directory.entryList(nameFilter).first());

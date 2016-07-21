@@ -116,7 +116,7 @@ signals:
      * @param status New activation status
      * @param id Related track number
      */
-    void onActivationSwitch()(bool status, int id);
+    void onActivationSwitch(bool status, int id);
 };
 
 #endif // TRACK_H
