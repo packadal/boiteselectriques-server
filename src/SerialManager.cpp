@@ -25,7 +25,7 @@ void SerialManager::stop() {
 
 void SerialManager::run() {
 
-#ifdef UDOO_BUILD
+#ifdef UDOO_BUILD // On UDOO
     // Port opening
     port = std::make_shared<QSerialPort>(SERIAL_PORT);
 
@@ -50,7 +50,7 @@ void SerialManager::run() {
             }
         }
     }
-#else
+#else // On Raspberry Pi
     int PadCutOff[8] = {300,300,300,300,300,300,300,300};
     int MaxPlayTime[8] = {90,90,90,90,90,90,90,90};
     bool ActivePad[8] = {0,0,0,0,0,0,0,0};
