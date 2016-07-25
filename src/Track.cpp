@@ -6,11 +6,12 @@
  */
 
 Track::Track():
-    m_soloState(false), m_activatedState(false), m_id(0)
+    m_id(0), m_file(""), m_name(""),
+    m_soloState(false), m_activatedState(false)
 {}
 
 Track::Track(const TrackData& data, Parameters<double> conf, int id):
-    m_file(data.file), m_name(data.name), m_id(id),
+    m_id(id), m_file(data.file), m_name(data.name),
     m_soloState(false), m_activatedState(false)
 {
     m_volumePtr = std::make_shared<Amplify<double>>(conf);

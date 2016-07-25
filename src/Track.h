@@ -29,19 +29,19 @@ class Track : public QObject
 {
     Q_OBJECT
 private:
-    std::shared_ptr<Mute<double>> m_muteState; /*< Mute state in the audio engine */
-    std::shared_ptr<Amplify<double>> m_volumePtr; /*< Volume in the audio engine */
-    std::shared_ptr<Pan<double>> m_panPtr; /*< Pan in the audio engine */
-
-    double m_volume; /*< "Raw" volume */
-    double m_pan; /*< "Raw" pan */
-
     unsigned int m_id; /*< Track number (default : its position in the PlayThread Tracks vector) */
     std::string m_file; /*< Filepath */
 
     std::string m_name;
     bool m_soloState;
     bool m_activatedState;
+
+    std::shared_ptr<Amplify<double>> m_volumePtr; /*< Volume in the audio engine */
+    std::shared_ptr<Pan<double>> m_panPtr; /*< Pan in the audio engine */
+    std::shared_ptr<Mute<double>> m_muteState; /*< Mute state in the audio engine */
+
+    double m_volume; /*< "Raw" volume */
+    double m_pan; /*< "Raw" pan */
 
 public:
     Track();
