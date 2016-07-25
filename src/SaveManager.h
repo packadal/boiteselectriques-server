@@ -14,7 +14,7 @@
 #include <QTemporaryDir>
 #include <QVector>
 #include <memory>
-#include <KF5/KArchive/KZip>
+#include <kzip.h>
 
 class Server;
 

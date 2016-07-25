@@ -10,9 +10,9 @@
 #include <QString>
 #include <QStringList>
 #include <QtSerialPort/QtSerialPort>
-#include <memory>
-
-#include <QDebug>
+#include <memory>//#include <wiringPiSPI.h>
+#include <wiringPi.h>
+#include <mcp3004.h>
 
 class QSerialPort;
 

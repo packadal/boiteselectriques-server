@@ -311,42 +311,52 @@ void Server::setTempo(unsigned int arg) {
 
 void Server::sendMsgThreshold(int boxSensor) {
     sender.send(osc::MessageGenerator()("/box/sensor", boxSensor));
+    qDebug() << "sent /box/sensor" << boxSensor;
 }
 
 void Server::sendMsgBoxActivation(int chan) {
     sender.send(osc::MessageGenerator()("/box/enable_out", chan));
+    qDebug() << "sent /box/enable_out" << chan;
 }
 
 void Server::sendMsgActivatedTracks(int val) {
     sender.send(osc::MessageGenerator()("/box/enable_sync", val));
+    qDebug() << "sent /box/enable_sync" << val;
 }
 
 void Server::sendMsgBeatCount(int beat) {
     sender.send(osc::MessageGenerator()("/box/beat", beat));
+    qDebug() << "sent /box/beat" << beat;
 }
 
 void Server::sendMsgPlay(int tempo) {
     sender.send(osc::MessageGenerator()("/box/play", tempo));
+    qDebug() << "sent /box/play" << tempo;
 }
 
 void Server::sendMsgSongTitle(const char *title) {
     sender.send(osc::MessageGenerator()("/box/title", title));
+    qDebug() << "sent /box/title" << title;
 }
 
 void Server::sendMsgSongsList(const char *list) {
     sender.send(osc::MessageGenerator()("/box/songs_list", list));
+    qDebug() << "sent /box/songs_list" << list;
 }
 
 void Server::sendMsgTracksCount(int num) {
     sender.send(osc::MessageGenerator()("/box/tracks_count", num));
+    qDebug() << "sent /box/tracks_count" << num;
 }
 
 void Server::sendMsgTracksList(const char *list) {
     sender.send(osc::MessageGenerator()("/box/tracks_list", list));
+    qDebug() << "sent /box/tracks_list" << list;
 }
 
 void Server::sendMsgReady(bool ready) {
     sender.send(osc::MessageGenerator()("/box/ready", ready));
+    qDebug() << "sent /box/ready" << ready;
 }
 
 int Server::load() {

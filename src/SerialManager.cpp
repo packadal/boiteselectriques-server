@@ -9,6 +9,10 @@
 #define BAUD_RATE 115200
 #define WAIT_TIME 100 /*< Time to wait between readings */
 
+#define BASE 100
+#define SPI_CHAN 0
+#define SPIspeed 1000000
+
 SerialManager::SerialManager(QObject *parent):
     QThread(parent) {
 
@@ -20,6 +24,8 @@ void SerialManager::stop() {
 }
 
 void SerialManager::run() {
+
+#ifdef UDOO_BUILD
     // Port opening
     port = std::make_shared<QSerialPort>(SERIAL_PORT);
 
@@ -44,4 +50,45 @@ void SerialManager::run() {
             }
         }
     }
+#else
+    int PadCutOff[8] = {300,300,300,300,300,300,300,300};
+    int MaxPlayTime[8] = {90,90,90,90,90,90,90,90};
+    bool ActivePad[8] = {0,0,0,0,0,0,0,0};
+    int PinPlayTime[8] = {0,0,0,0,0,0,0,0};
+    int pin = 0;
+    int hitavg = 0;
+    bool run = true;
+
+    wiringPiSetupSys ();
+
+    mcp3004Setup(BASE,SPI_CHAN);
+
+    while (run){
+
+       for(pin=0; pin<8; pin++){
+
+           hitavg = analogRead(BASE + pin);
+
+           if(hitavg>PadCutOff[pin]){
+               if(ActivePad[pin]==false){
+                   emit boxActivated(pin, 0);
+                   PinPlayTime[pin]=0;
+                   ActivePad[pin]=true;
+               } else {
+                   PinPlayTime[pin]=PinPlayTime[pin]+1;
+               }
+           }
+           else if(ActivePad[pin]==true){
+               PinPlayTime[pin]=PinPlayTime[pin]+1;
+               if(PinPlayTime[pin]>MaxPlayTime[pin]){
+                   ActivePad[pin] = false;
+                   emit boxActivated(pin, hitavg+300);
+               }
+           }
+
+       }
+
+    }
+#endif
+
 }

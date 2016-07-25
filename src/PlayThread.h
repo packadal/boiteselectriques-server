@@ -12,11 +12,11 @@
 #include <QThread>
 #include <manager/StreamingManager.h>
 #include <unistd.h>
-#include <io/FFMPEGFileInput.h>
-#include <io/LoopInputProxy.h>
-#include <io/InputMultiplexer2.h>
-#include <io/StereoAdapter.h>
-#include <io/SummationProxy.h>
+#include <io/inputs/FFMPEGFileInput.h>
+#include <io/proxies/LoopInputProxy.h>
+#include <io/proxies/InputMultiplexer2.h>
+#include <io/proxies/StereoAdapter.h>
+#include <io/proxies/SummationProxy.h>
 #include <benchmark/Amplify.h>
 #include <benchmark/Pan.h>
 #include <benchmark/Mute.h>
@@ -189,6 +189,13 @@ private:
 
     bool isPlaying {false};
     int m_threshold {DEFAULT_THRESHOLD};
+
+    /**
+     * @brief Check if a given track exists
+     * @param track Track number
+     * @return true if the track exists, false else
+     */
+    bool isValidTrack(unsigned int track);
 };
 
 #endif // PLAYTHREAD_H

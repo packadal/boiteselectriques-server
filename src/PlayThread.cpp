@@ -7,7 +7,7 @@
 
 #include "Track.h"
 
-#include <io/SfxInputProxy.h>
+#include <io/proxies/SfxInputProxy.h>
 #include <stream_io/RtAudioOutput.h>
 #include <RtAudio.h>
 #include <QDebug>
@@ -21,7 +21,7 @@ unsigned int PlayThread::getTracksCount() const {
 }
 
 Track* PlayThread::getTrack(const unsigned int track){
-    return tracks[track];
+    return (isValidTrack(track) ? tracks[track] : NULL);
 }
 
 int PlayThread::getActivatedTracks() const{
@@ -48,15 +48,18 @@ void PlayThread::setMasterVolume(const unsigned int vol) {
 }
 
 void PlayThread::setVolume(const unsigned int track, const unsigned int vol) {
-    tracks[track]->setVolume(vol);
+    if(isValidTrack(track))
+        tracks[track]->setVolume(vol);
 }
 
 void PlayThread::setPan(const unsigned int track, const int pan) {
-    tracks[track]->setPan(pan);
+    if(isValidTrack(track))
+        tracks[track]->setPan(pan);
 }
 
 void PlayThread::setMute(const unsigned int track, const bool doMute) {
-    tracks[track]->setMute(doMute);
+    if(isValidTrack(track))
+        tracks[track]->setMute(doMute);
 }
 
 void PlayThread::timeHandle() {
@@ -85,31 +88,33 @@ void PlayThread::reset() {
 }
 
 void PlayThread::solo(const unsigned int track, const bool state) {
-    if(track < tracks.size())
+    if(isValidTrack(track)) {
         tracks[track]->setSolo(state);
 
-    if(state) {
-        tracks[track]->setMute(false);
+        if(state) {
+            tracks[track]->setMute(false);
 
-        for(int i=0; i<tracks.size(); i++)
-            if(!tracks[i]->isSolo())
-                tracks[i]->setMute(true);
-    } else {
-        bool noMoreSolo = true;
-        for(int i=0; i<tracks.size() && noMoreSolo; i++)
-            if(tracks[i]->isSolo())
-                noMoreSolo = false;
-
-        if(noMoreSolo)
             for(int i=0; i<tracks.size(); i++)
-                tracks[i]->setMute( !tracks[i]->isActivated() );
-        else
-            tracks[track]->setMute( true );
+                if(!tracks[i]->isSolo())
+                    tracks[i]->setMute(true);
+        } else {
+            bool noMoreSolo = true;
+            for(int i=0; i<tracks.size() && noMoreSolo; i++)
+                if(tracks[i]->isSolo())
+                    noMoreSolo = false;
+
+            if(noMoreSolo)
+                for(int i=0; i<tracks.size(); i++)
+                    tracks[i]->setMute( !tracks[i]->isActivated() );
+            else
+                tracks[track]->setMute( true );
+        }
     }
 }
 
 void PlayThread::switchBox(const unsigned int track) {
-    tracks[track]->setActivated(!tracks[track]->isActivated());
+    if(isValidTrack(track))
+        tracks[track]->setActivated(!tracks[track]->isActivated());
 }
 
 void PlayThread::setThreshold(const unsigned int threshold){
@@ -157,7 +162,16 @@ void PlayThread::load(const SongData& s) {
     manager = std::make_shared<StreamingManager<double>>(std::move(input),
               std::move(std::make_shared<RtAudioOutput<double>>(conf)),
               std::bind(&PlayThread::timeHandle, this),
-              conf);
+                                                         conf);
+}
+
+bool PlayThread::isValidTrack(unsigned int track)
+{
+    bool isValid = track < getTracksCount();
+    if(!isValid)
+        qCritical() << tr("ERROR : Inexistent track") << track;
+
+    return isValid;
 }
 
 void PlayThread::onEnablementChanged(bool enabled, int track) {

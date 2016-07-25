@@ -8,7 +8,7 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -std=c++1y
 
 QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS_RELEASE += -Ofast -march=native -flto -fopenmp
+QMAKE_CXXFLAGS_RELEASE += -Ofast -march=armv6 -flto -fopenmp
 QMAKE_LFLAGS_RELEASE -= -Wl,-O1
 QMAKE_LFLAGS_RELEASE += -Wl,-O3 -Wl,-flto
 
@@ -32,15 +32,22 @@ HEADERS += Server.h \
 
 FORMS   +=
 
-INCLUDEPATH += $$PWD/../../watermarking/src/libwatermark
-DEPENDPATH += $$PWD/../../watermarking/src/libwatermark
+INCLUDEPATH += $$PWD/../deps/libwatermark
+DEPENDPATH += $$PWD/../deps/libwatermark
 
-LIBS+= -lgomp -lsndfile -lrtaudio # -lavcodec -lavformat -lavutil
-#LIBS+= -lgcov
+INCLUDEPATH += /usr/include/oscpack/ /home/pi/boiteselec-interfaceqt/deps/rtaudio-4.1.2/
 
 
-INCLUDEPATH += /usr/local/include/KF5/KArchive
-LIBS += -lKF5Archive
+LIBS+= -lgomp -lsndfile
+LIBS+= -lrtaudio
+LIBS+= -lasound
+LIBS+= -loscpack
+LIBS+= -lwiringPi
+
+LIBS+= -L$$PWD/../deps/karchive-5.17.0/src -L$$PWD/../deps/karchive-5.17.0/build/src -lKF5Archive
+INCLUDEPATH += $$PWD/../deps/karchive-5.17.0/src $$PWD/../deps/karchive-5.17.0/build/src
+DEPENDPATH += $$PWD/../deps/karchive-5.17.0/src $$PWD/../deps/karchive-5.17.0/build/src
+PRE_TARGETDEPS += $$PWD/../deps/karchive-5.17.0/build/src/libKF5Archive.so.5
 
 RESOURCES += 
 
@@ -49,9 +56,9 @@ OTHER_FILES +=
 
 #### Libraries ####
   ##  Oscpack  ##
-unix:!macx: LIBS += -L$$PWD/../../../git/oscpack/build/ -loscpack
+# unix:!macx: LIBS += -L$$PWD/../../../git/oscpack/build/ -loscpack
 
-INCLUDEPATH += $$PWD/../../../git/oscpack/src
-DEPENDPATH += $$PWD/../../../git/oscpack/src
+# INCLUDEPATH += $$PWD/../../../git/oscpack/src
+# DEPENDPATH += $$PWD/../../../git/oscpack/src
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../git/oscpack/build/liboscpack.a
+#unix:!macx: PRE_TARGETDEPS += $$PWD/../../../git/oscpack/build/liboscpack.a
