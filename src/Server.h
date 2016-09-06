@@ -24,34 +24,36 @@ class SaveManager;
  *
  * Handles the events and dispatch the corresponding actions
  */
-class Server : public QObject {
+class Server : public QCoreApplication {
     Q_OBJECT
     Q_PROPERTY(int tempo READ getTempo WRITE setTempo)
 
     friend class SaveManager;
 
 private:
-    PlayThread player; /*< Audio play manager */
+    PlayThread* player; /*< Audio play manager */
     SaveManager saveManager; /*< File handling manager */
     SerialManager serialManager {this}; /*< Interface with serial port */
+
+    QSettings* options; /*< Config options */
 
     SongData song; /*< Actual song's data */
     QString selSong; /*< Selected song's name */
     int threshold;
     int nbChannels;
-    QString currentFile {};
+    QString currentFile;
 
     bool m_loaded {false}; /*< Indicate if a song has been loaded */
     bool m_playing {false}; /*< Indicate if a song is playing */
 
-    int m_tempo {};
-    double m_beatCount {};
+    int m_tempo;
+    double m_beatCount;
     // Optimization : Comparison with the previous beat
     int m_previousBeat {-1};
 
 
-    OscReceiver receiver {9988}; /*< Receiving interface with OSC protocol */
-    OscSender sender {"192.170.0.17", 9989}; /*< Sending interface with OSC protocol */
+    OscReceiver* receiver; /*< Receiving interface with OSC protocol */
+    OscSender* sender; /*< Sending interface with OSC protocol */
 
     /***************************
      * TRANSMISSIONS TO CLIENT *
@@ -61,21 +63,21 @@ private:
 
     /**
      * @brief Send the actual threshold value to the client
-     * @param (Calculated) Threshold value (obtained with getThreshold() )
+     * @param t Threshold value
      */
-    void sendMsgThreshold(int boxSensor);
+    void sendMsgThreshold(int t);
     /**
      * @brief Notify the client of a box activation
-     * @param Track number
+     * @param chan Track number
      */
     void sendMsgBoxActivation(int chan);
     /**
      * @brief Send the activated tracks' numbers to the client
-     * @param val Activated tracks
+     * @param tracks Tracks numbers
      *
      * Called each 8 beats, to keep the client synchronized
      */
-    void sendMsgActivatedTracks(int val);
+    void sendMsgActivatedTracks(int tracks);
     /**
      * @brief Send the actual beat count
      * @param beat Beat count
@@ -83,7 +85,7 @@ private:
     void sendMsgBeatCount(int beat);
     /**
      * @brief Notify the client of the song's playing start
-     * @param tempo Song's tempo
+     * @param tempo Actual song's tempo
      */
     void sendMsgPlay(int tempo);
     /**
@@ -110,7 +112,7 @@ private:
      * @brief Notify the client of the loading state
      * @param isReady Server's loading state
      */
-    void sendMsgReady(bool sendMsgReady);
+    void sendMsgReady(bool isReady);
 
 
     /*******************
@@ -208,9 +210,21 @@ private:
      * Select a new song
      */
     void handle__box_selectSong(osc::ReceivedMessageArgumentStream args);
+    /**
+     * @brief sync event handling
+     * @param args Nothing
+     *
+     * Send the informations of the actual song and the current state of the player
+     */
+    void handle__box_sync(osc::ReceivedMessageArgumentStream args);
 
 public:
-    explicit Server();
+    /**
+     * @brief Constructor of the Server class
+     * @param argc Number of arguments
+     * @param argv Arguments array
+     */
+    explicit Server(int& argc, char* argv[]);
     ~Server();
 
     /**
@@ -224,6 +238,13 @@ public:
      * @return Threshold value to transmit
      */
     unsigned int getThreshold() const;
+
+    /**
+     * @brief Load or initialize the configuration options
+     * @param c Pointer to the options data
+     * @return If the config options have been loaded (true) or generated from the default values (false)
+     */
+    bool initConf(QSettings *c);
 
 signals:
     /**
@@ -241,6 +262,13 @@ signals:
     void resetThreshold();
 
 public slots:
+
+    /**
+     * @brief Stop properly the application
+     * @param sig Exit signal
+     */
+//    static void quit(int sig);
+
     /**
      * @brief Reset the values to default
      */
@@ -325,19 +353,16 @@ public slots:
     void sendBeatCount(unsigned int beat);
     /**
      * @brief Send the actual song's title
-     * @param title Song's title
      */
-    void sendSongTitle(const char* title);
+    void sendSongTitle();
     /**
      * @brief Send the available songs' list
-     * @param list Songs' titles list
      */
-    void sendSongsList(const char* list);
+    void sendSongsList();
     /**
      * @brief Send the song's number of tracks
-     * @param num Count of tracks
      */
-    void sendTracksCount(unsigned int num);
+    void sendTracksCount();
     /**
      * @brief Notify the client of the loading state
      * @param isReady Server's loading state
@@ -345,6 +370,18 @@ public slots:
      * Send true if all the songs are loaded, false else
      */
     void sendReady(bool isReady);
+    /**
+     * @brief Send the server's threshold
+     */
+    void sendThreshold();
+    /**
+     * @brief Send the song's actual activated tracks
+     */
+    void sendActivatedTracks();
+    /**
+     * @brief Notify the client of the song's playing start
+     */
+    void sendPlay();
 };
 
 #endif // SERVER_H

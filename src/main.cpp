@@ -4,11 +4,23 @@
  */
 
 #include "Server.h"
-#include <QApplication>
+#include <QCoreApplication>
 #include <QDebug>
+#include <csignal>
+
+struct QuitStruct{
+    QuitStruct(){
+        std::signal(SIGINT, &QuitStruct::exitApp );
+        std::signal(SIGTERM, &QuitStruct::exitApp );
+    }
+
+    static void exitApp(int sig){
+        QCoreApplication::exit(0);
+    }
+};
 
 int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
-    Server w;
-    return a.exec();
+    QuitStruct qs;
+    Server s(argc, argv);
+    return s.exec();
 }

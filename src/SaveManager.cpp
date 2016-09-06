@@ -85,8 +85,8 @@ void SaveManager::save(const QString savepath, Server* manager) {
     int count = settings.value("General/trackCount").toInt();
 
     for(int i = 0; i < count; ++ i) {
-        settings.setValue(QString("Track%1/volume").arg(i), manager->player.getTrack(i)->getVolume());
-        settings.setValue(QString("Track%1/pan").arg(i), manager->player.getTrack(i)->getPan());
+        settings.setValue(QString("Track%1/volume").arg(i), manager->player->getTrack(i)->getVolume());
+        settings.setValue(QString("Track%1/pan").arg(i), manager->player->getTrack(i)->getPan());
     }
 
     settings.sync();

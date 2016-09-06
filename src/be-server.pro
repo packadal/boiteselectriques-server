@@ -1,7 +1,8 @@
-QT += core gui serialport
+QT += core serialport
+QT -= gui
 CONFIG += console
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport
+greaterThan(QT_MAJOR_VERSION, 4): QT += serialport
 
 TARGET = be-server
 TEMPLATE = app
@@ -32,7 +33,7 @@ HEADERS += \
         SerialManager.h \
     Server.h
 
-INCLUDEPATH += $$PWD/../../libaudiotool/src/libwatermark
+INCLUDEPATH +=  $$PWD/../../libaudiotool/src/libwatermark
 DEPENDPATH += $$PWD/../../libaudiotool/src/libwatermark
 
 LIBS+= -lgomp -lsndfile

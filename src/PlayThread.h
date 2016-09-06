@@ -10,6 +10,7 @@
 #include "Track.h"
 
 #include <QThread>
+#include <QSettings>
 #include <manager/StreamingManager.h>
 #include <unistd.h>
 #include <io/inputs/FFMPEGFileInput.h>
@@ -25,10 +26,6 @@
 template<typename T>
 class StreamingManager;
 
-
-#define DEFAULT_THRESHOLD 200 /*< Default raw threshold value */
-#define DEFAULT_MASTER_VOLUME 50 /*< Default master volume value */
-
 /**
  * @brief The PlayThread class
  *
@@ -37,7 +34,7 @@ class StreamingManager;
 class PlayThread : public QThread {
     Q_OBJECT
 public:
-    explicit PlayThread();
+    explicit PlayThread(QSettings*);
 
     /**
      * @brief Give the number of the song's tracks
@@ -178,6 +175,7 @@ public slots:
     void load(const SongData& s);
 
 private:
+    QSettings* options;
     Parameters<double> conf; /*< Configuration data */
     std::shared_ptr<Amplify<double>> masterVolume {new Amplify<double>(conf)};
     std::shared_ptr<StreamingManager<double>> manager;
@@ -188,7 +186,7 @@ private:
     int maxBufferCount {}; /*< Total buffer count in a loop */
 
     bool isPlaying {false};
-    int m_threshold {DEFAULT_THRESHOLD};
+    int m_threshold;
 
     /**
      * @brief Check if a given track exists

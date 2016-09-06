@@ -12,8 +12,12 @@
 #include <RtAudio.h>
 #include <QDebug>
 
-PlayThread::PlayThread() :
-    QThread(0) {
+PlayThread::PlayThread(QSettings* c) :
+    QThread(0), options(c) {
+
+    options->beginGroup("default");
+    setThreshold(options->value("threshold").toInt());
+    options->endGroup();
 }
 
 unsigned int PlayThread::getTracksCount() const {
@@ -70,10 +74,12 @@ void PlayThread::timeHandle() {
 }
 
 void PlayThread::stop() {
-    manager->stop();
-    manager->input()->reset();
-    bufferCount = 0;
-    isPlaying = false;
+    if(this->isRunning()){
+        manager->stop();
+        manager->input()->reset();
+        bufferCount = 0;
+        isPlaying = false;
+    }
 }
 
 bool PlayThread::isStopped() const {
@@ -81,7 +87,9 @@ bool PlayThread::isStopped() const {
 }
 
 void PlayThread::reset() {
-    setMasterVolume(DEFAULT_MASTER_VOLUME);
+    options->beginGroup("default");
+    setMasterVolume(options->value("master").toInt());
+    options->endGroup();
 
     for(int i=0; i<tracks.size(); i++)
         tracks[i]->reset();
@@ -122,7 +130,9 @@ void PlayThread::setThreshold(const unsigned int threshold){
 }
 
 void PlayThread::resetThreshold() {
-    setThreshold(DEFAULT_THRESHOLD);
+    options->beginGroup("default");
+    setThreshold(options->value("threshold").toInt());
+    options->endGroup();
 }
 
 void PlayThread::load(const SongData& s) {
@@ -140,7 +150,7 @@ void PlayThread::load(const SongData& s) {
 
 #pragma omp parallel for
     for(int i = 0; i < track_count; i++) {
-        Track* t = new Track(s.tracks[i], conf, i);
+        Track* t = new Track(s.tracks[i], conf, options, i);
         connect(t, &Track::onActivationSwitch,
                 this, &PlayThread::onEnablementChanged);
         tracks[i] = t;

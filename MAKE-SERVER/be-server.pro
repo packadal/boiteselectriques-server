@@ -1,6 +1,7 @@
-QT += core gui serialport
+QT += core serialport
+QT -= gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport
+greaterThan(QT_MAJOR_VERSION, 4): QT += serialport
 
 TARGET = be-server
 TEMPLATE = app
@@ -30,9 +31,7 @@ HEADERS += Server.h \
 	SaveManager.h \
         SerialManager.h
 
-FORMS   +=
-
-INCLUDEPATH += $$PWD/../deps/libwatermark
+INCLUDEPATH += 	$$PWD/../deps/libwatermark
 DEPENDPATH += $$PWD/../deps/libwatermark
 
 INCLUDEPATH += /usr/include/oscpack/ /home/pi/boiteselec-interfaceqt/deps/rtaudio-4.1.2/

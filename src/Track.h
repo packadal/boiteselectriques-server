@@ -11,13 +11,10 @@
 #include <QDebug>
 
 #include <QString>
+#include <QSettings>
 #include <benchmark/Amplify.h>
 #include <benchmark/Pan.h>
 #include <benchmark/Mute.h>
-
-#define DEFAULT_VOLUME 50
-#define DEFAULT_PAN 0
-#define DEFAULT_ACTIVATION false
 
 /**
  * @brief The Track class
@@ -36,6 +33,8 @@ private:
     bool m_soloState;
     bool m_activatedState;
 
+    QSettings* options;
+
     std::shared_ptr<Amplify<double>> m_volumePtr; /*< Volume in the audio engine */
     std::shared_ptr<Pan<double>> m_panPtr; /*< Pan in the audio engine */
     std::shared_ptr<Mute<double>> m_muteState; /*< Mute state in the audio engine */
@@ -51,7 +50,7 @@ public:
      * @param conf Default configuration data (volume, pan, mute)
      * @param id Track number (should be its position in the PlayThread's tracks vector)
      */
-    Track(const TrackData& data, Parameters<double> conf, int id);
+    Track(const TrackData& data, Parameters<double> conf, QSettings* opt, int id);
 
     std::string getName() const;
     std::string getFile() const;
@@ -104,11 +103,7 @@ public:
     /**
      * @brief Reset the track's settings to their default values
      */
-    void reset() {
-        setVolume(DEFAULT_VOLUME);
-        setPan(DEFAULT_PAN);
-        setActivated(DEFAULT_ACTIVATION);
-    }
+    void reset();
 
 signals:
     /**
