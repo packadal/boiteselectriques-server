@@ -69,14 +69,6 @@ private:
      * @brief Setup WiringPi interface
      */
     void ledSetup();
-    /**
-     * @brief Activate the configured LED
-     */
-    void ledOn();
-    /**
-     * @brief Deactivate the configured LED
-     */
-    void ledOff();
 
     /***************************
      * TRANSMISSIONS TO CLIENT *
@@ -267,6 +259,19 @@ public:
      * @return If the config options have been loaded (true) or generated from the default values (false)
      */
     bool initConf(QSettings *c);
+
+    /**
+     * @brief Activate the configured LED
+     */
+    void ledOn();
+    /**
+     * @brief Deactivate the configured LED
+     */
+    void ledOff();
+    /**
+     * @brief Make the LED blink
+     */
+    void ledBlink();
 
 signals:
     /**

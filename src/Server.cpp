@@ -9,6 +9,7 @@
 #include <exception>
 
 #include <wiringPi.h>
+#include <unistd.h>
 
 #define DEFAULT_EXTENSION "*.song" /*< Song files extension */
 #define DEFAULT_FOLDER "/home/pi/songs/" /*< Files save/load folder*/
@@ -46,6 +47,14 @@ void Server::ledOff(){
 
     QString c = QStringLiteral("gpio write %1 0").arg(options->value("gpio/led").toInt());
     std::system(c.toStdString().c_str());
+}
+
+void Server::ledBlink(){
+    for(int i=0; i<2; i++) {
+        ledOff();
+        usleep(300);
+        ledOn();
+    }
 }
 
 Server::Server(QSettings* opt):
@@ -269,6 +278,7 @@ void Server::handle__box_updateThreshold(osc::ReceivedMessageArgumentStream args
     args >> senseUpdated;
     qDebug() << "received /box/update_threshold" << senseUpdated;
 
+    ledBlink();
     emit updateThreshold(senseUpdated);
 }
 
@@ -277,6 +287,7 @@ void Server::handle__box_resetThreshold(osc::ReceivedMessageArgumentStream args)
     args >> senseUpdated;
     qDebug() << "received /box/reset_threshold" << senseUpdated;
 
+    ledBlink();
     emit resetThreshold();
 }
 
@@ -285,6 +296,7 @@ void Server::handle__box_enable(osc::ReceivedMessageArgumentStream args) {
     args >> box;
     qDebug() << "received /box/enable" << box;
 
+    ledBlink();
     switchBox(box, player->getThreshold());
 }
 
@@ -294,6 +306,7 @@ void Server::handle__box_volume(osc::ReceivedMessageArgumentStream args) {
     args >> box >> vol;
     qDebug() << "received /box/volume" << vol;
 
+    ledBlink();
     player->setVolume(box, vol);
 }
 
@@ -303,6 +316,7 @@ void Server::handle__box_pan(osc::ReceivedMessageArgumentStream args) {
     args >> box >> vol;
     qDebug() << "received /box/pan" << box << vol;
 
+    ledBlink();
     player->setPan(box, vol);
 }
 
@@ -312,6 +326,7 @@ void Server::handle__box_mute(osc::ReceivedMessageArgumentStream args) {
     args >> box >> state;
     qDebug() << "received /box/mute" << box << state;
 
+    ledBlink();
     player->setMute(box, state);
 }
 
@@ -321,6 +336,7 @@ void Server::handle__box_solo(osc::ReceivedMessageArgumentStream args) {
     args >> box >> state;
     qDebug() << "received /box/solo" << box << state;
 
+    ledBlink();
     player->solo(box, state);
 }
 
@@ -329,6 +345,7 @@ void Server::handle__box_master(osc::ReceivedMessageArgumentStream args) {
     args >> vol;
     qDebug() << "received /box/master" << vol;
 
+    ledBlink();
     player->setMasterVolume(vol);
 }
 
@@ -337,6 +354,7 @@ void Server::handle__box_play(osc::ReceivedMessageArgumentStream args) {
     args >> state;
     qDebug() << "received /box/play" << state;
 
+    ledBlink();
     play();
 }
 
@@ -345,6 +363,7 @@ void Server::handle__box_stop(osc::ReceivedMessageArgumentStream args) {
     args >> state;
     qDebug() << "received /box/stop" << state;
 
+    ledBlink();
     stop();
 }
 
@@ -352,6 +371,8 @@ void Server::handle__box_reset(osc::ReceivedMessageArgumentStream args) {
     bool state;
     args >> state;
     qDebug() << "received /box/reset" << state;
+
+    ledBlink();
 
     if(state)
         stop();
@@ -364,6 +385,7 @@ void Server::handle__box_refreshSong(osc::ReceivedMessageArgumentStream args) {
     args >> state;
     qDebug() << "received /box/refresh_song" << state;
 
+    ledBlink();
     load();
 }
 
@@ -371,6 +393,8 @@ void Server::handle__box_selectSong(osc::ReceivedMessageArgumentStream args) {
     const char *receptSong;
     args >> receptSong;
     qDebug() << "received /box/select_song" << receptSong;
+
+    ledBlink();
 
     QString so = QString(QLatin1String(receptSong));
     if(!so.isEmpty())
@@ -386,6 +410,8 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args)
     bool state;
     args >> state;
     qDebug() << "received /box/sync" << state;
+
+    ledBlink();
 
     sendSongsList();
     sendThreshold();
