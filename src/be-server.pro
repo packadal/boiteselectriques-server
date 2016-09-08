@@ -36,7 +36,7 @@ HEADERS += \
 INCLUDEPATH +=  $$PWD/../../libaudiotool/src/libwatermark
 DEPENDPATH += $$PWD/../../libaudiotool/src/libwatermark
 
-LIBS+= -lgomp -lsndfile
+LIBS+= -lgomp -lsndfile -lwiringpi
 #LIBS+= -lportaudiocpp -lportaudio
 LIBS+= -lrtaudio
 LIBS+= -lasound

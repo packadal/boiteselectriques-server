@@ -8,9 +8,7 @@
 #include <QDebug>
 #include <exception>
 
-//#define CONFIG_FILE "~/.config/Boites Electriques/config.txt"
-#define COMPANY_NAME "Rock & Chanson"
-#define APP_NAME "Boites Electriques"
+#include <wiringPi.h>
 
 #define DEFAULT_EXTENSION "*.song" /*< Song files extension */
 #define DEFAULT_FOLDER "/home/pi/songs/" /*< Files save/load folder*/
@@ -26,13 +24,38 @@
 #define DEFAULT_PAN 0
 #define DEFAULT_ACTIVATION false
 
-Server::Server(int& argc, char *argv[]):
-    QCoreApplication(argc, argv){
+#define DEFAULT_LED 6 /*< wiringPi LED's GPIO identifier */
 
-    options = new QSettings(QSettings::IniFormat, QSettings::UserScope,
-                            COMPANY_NAME, APP_NAME);
+void Server::ledSetup(){
+    wiringPiSetupSys();
+    //pinMode(LED_VALUE, OUTPUT);
+
+    QString c = QStringLiteral("gpio mode %1 out").arg(options->value("gpio/led").toInt());
+    std::system(c.toStdString().c_str());
+}
+
+void Server::ledOn(){
+    //digitalWrite(LED_VALUE, HIGH);
+
+    QString c = QStringLiteral("gpio write %1 1").arg(options->value("gpio/led").toInt());
+    std::system(c.toStdString().c_str());
+}
+
+void Server::ledOff(){
+    //digitalWrite(LED_VALUE, LOW);
+
+    QString c = QStringLiteral("gpio write %1 0").arg(options->value("gpio/led").toInt());
+    std::system(c.toStdString().c_str());
+}
+
+Server::Server(QSettings* opt):
+    options(opt){
+
     initConf(options);
     qDebug() << options->fileName();
+
+    ledSetup();
+    ledOn();
 
     player = new PlayThread(options);
 
@@ -116,8 +139,9 @@ Server::Server(int& argc, char *argv[]):
 }
 
 Server::~Server() {
-    qDebug() << "Quitting server...";
+    qDebug() << "Stopping server...";
     stop();
+
     player->stop();
     qDebug() << "PlayThread stopping...";
     if(!player->wait(5000)) {
@@ -138,11 +162,12 @@ Server::~Server() {
 
     qDebug() << "Deleting pointers...";
     delete player;
+
+    ledOff();
     delete options;
 
-    qDebug() << "Proper quitting OK";
-
-    QCoreApplication::quit();
+    qDebug() << "Stopping CoreApp...";
+    QCoreApplication::exit(0);
 }
 
 int Server::getTempo() const {
@@ -154,32 +179,35 @@ unsigned int Server::getThreshold() const {
 }
 
 bool Server::initConf(QSettings *c) {
-    QFile f(c->fileName());
 
-    if(!f.exists()){
-        c->beginGroup("default");
-        c->setValue("threshold", DEFAULT_THRESHOLD);
-        c->setValue("master", DEFAULT_MASTER_VOLUME);
-        c->setValue("volume", DEFAULT_VOLUME);
-        c->setValue("pan", DEFAULT_PAN);
-        c->setValue("activation", DEFAULT_ACTIVATION);
-        c->endGroup();
+    QList<struct Settings> default_settings;
 
-        c->beginGroup("files");
-        c->setValue("folder", DEFAULT_FOLDER);
-        c->setValue("extension", DEFAULT_EXTENSION);
-        c->endGroup();
+    default_settings.append(Settings("default/threshold", DEFAULT_THRESHOLD));
+    default_settings.append(Settings("default/master", DEFAULT_MASTER_VOLUME));
+    default_settings.append(Settings("default/volume", DEFAULT_VOLUME));
+    default_settings.append(Settings("default/pan", DEFAULT_PAN));
+    default_settings.append(Settings("default/activation", DEFAULT_ACTIVATION));
 
-        c->beginGroup("osc");
-        c->setValue("ip", DEFAULT_IP);
-        c->setValue("sender", DEFAULT_SENDER);
-        c->setValue("receiver", DEFAULT_RECEIVER);
-        c->endGroup();
+    default_settings.append(Settings("files/folder", DEFAULT_FOLDER));
+    default_settings.append(Settings("files/extension", DEFAULT_EXTENSION));
 
-        return false;
-    } else
-        return true;
+    default_settings.append(Settings("gpio/led", DEFAULT_LED));
 
+    default_settings.append(Settings("osc/ip", DEFAULT_IP));
+    default_settings.append(Settings("osc/sender", DEFAULT_SENDER));
+    default_settings.append(Settings("osc/receiver", DEFAULT_RECEIVER));
+
+    QList<struct Settings>::const_iterator it;
+    for(it = default_settings.constBegin(); it < default_settings.constEnd(); it++){
+        if(!c->contains(it->key))
+            c->setValue(it->key, it->value.toString());
+    }
+
+    QStringList lst = c->allKeys();
+    for(QStringList::const_iterator k = lst.constBegin(); k<lst.constEnd(); k++)
+        qDebug() << *k << " : " << c->value(*k).toString();
+
+    return false;
 }
 
 void Server::sendReady(bool isReady) {

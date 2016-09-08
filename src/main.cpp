@@ -8,6 +8,9 @@
 #include <QDebug>
 #include <csignal>
 
+#define COMPANY_NAME "Rock & Chanson"
+#define APP_NAME "Boites Electriques"
+
 struct QuitStruct{
     QuitStruct(){
         std::signal(SIGINT, &QuitStruct::exitApp );
@@ -21,6 +24,27 @@ struct QuitStruct{
 
 int main(int argc, char *argv[]) {
     QuitStruct qs;
-    Server s(argc, argv);
-    return s.exec();
+    QCoreApplication app(argc, argv);
+
+    QCommandLineParser p;
+    p.setApplicationDescription("Boites Electriques - Server");
+    p.addHelpOption();
+    QCommandLineOption configFile(QStringList()<<"c"<<"config",
+                                  QCoreApplication::translate("config", "Set config file path to <directory>"),
+                                  QCoreApplication::translate("config", "directory"));
+    p.addOption(configFile);
+    p.process(app);
+
+    QSettings* opt;
+    if(p.isSet(configFile)){
+        qDebug() << "Cust : " << p.value(configFile);
+        opt = new QSettings(p.value(configFile), QSettings::IniFormat);
+    } else {
+        opt = new QSettings(QSettings::IniFormat, QSettings::UserScope,
+                            COMPANY_NAME, APP_NAME);
+        }
+
+    Server s(opt);
+
+    return app.exec();
 }

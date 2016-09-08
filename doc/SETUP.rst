@@ -41,13 +41,20 @@ The following options are available :
 ``[files]`` section
 ~~~~~~~~~~~~~~~~~~~
   
-``export_folder``
+``folder``
   Files save/load folder (string : path, ending with '/')
   Default : /home/pi/songs/
   
 ``extension``
   Songs files' extension (string : '*.<extension>')
   Default : *.song
+
+``[gpio]`` section
+~~~~~~~~~~~~~~~~~~
+
+``led``
+  LED's WiringPi identifier (to use with the ``gpio`` command)
+  Default : 6
 
 ``[osc]`` section
 ~~~~~~~~~~~~~~~~~
@@ -63,3 +70,8 @@ The following options are available :
 ``sender``
   Server's OSC sender port (integer)
   Default : 9989
+  
+Run
+---
+
+To start the server, just run ``./be-server``

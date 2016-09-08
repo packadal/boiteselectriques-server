@@ -19,12 +19,22 @@ class SaveManager;
 #define EXPORT_FOLDER "/home/pi/songs/" /*< Files save/load folder*/
 #define FILES_EXTENSION "*.song" /*< Song files extension */
 
+struct Settings {
+    QString key;
+    QVariant value;
+
+    Settings(QString k, QVariant v){
+        key = k;
+        value = v;
+    }
+};
+
 /**
  * @brief Main class
  *
  * Handles the events and dispatch the corresponding actions
  */
-class Server : public QCoreApplication {
+class Server : public /*QCoreApplication*/ QObject {
     Q_OBJECT
     Q_PROPERTY(int tempo READ getTempo WRITE setTempo)
 
@@ -54,6 +64,19 @@ private:
 
     OscReceiver* receiver; /*< Receiving interface with OSC protocol */
     OscSender* sender; /*< Sending interface with OSC protocol */
+
+    /**
+     * @brief Setup WiringPi interface
+     */
+    void ledSetup();
+    /**
+     * @brief Activate the configured LED
+     */
+    void ledOn();
+    /**
+     * @brief Deactivate the configured LED
+     */
+    void ledOff();
 
     /***************************
      * TRANSMISSIONS TO CLIENT *
@@ -221,10 +244,9 @@ private:
 public:
     /**
      * @brief Constructor of the Server class
-     * @param argc Number of arguments
-     * @param argv Arguments array
+     * @param opt Configuration data
      */
-    explicit Server(int& argc, char* argv[]);
+    explicit Server(QSettings* opt);
     ~Server();
 
     /**
@@ -262,13 +284,6 @@ signals:
     void resetThreshold();
 
 public slots:
-
-    /**
-     * @brief Stop properly the application
-     * @param sig Exit signal
-     */
-//    static void quit(int sig);
-
     /**
      * @brief Reset the values to default
      */

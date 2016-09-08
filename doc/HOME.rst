@@ -20,6 +20,10 @@ General informations
 
 This documentation is formatted using the `reStructuredText <http://docutils.sourceforge.net/rst.html>`_ syntax, and is distributed under the Creative Commons BY-SA 4.0 license.
 
-The `RudeConfig™ Open Source C++ Config File Library <http://rudeserver.com/config/>`_ is written and distributed under the `GNU GPL v2 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>`_.
+The `Open Sound Control (OSC) packet manipulation library <http://www.rossbencina.com/code/oscpack>`_ is written and distributed under the `MIT license <https://opensource.org/licenses/mit-license.phpl>`_, with the following addition : 
+
+	"Any person wishing to distribute modifications to the Software is requested to send the modifications to `the original developer <mailto:rossb@audiomulch.com>`_ so that they can be incorporated into the canonical version. It is also requested that these non-binding requests be included whenever the above license is reproduced."
+
+The `libaudiotool audio framework <https://github.com/jcelerier/libaudiotool>`_ is distributed under the `GNU GPL v3 <https://www.gnu.org/licenses/gpl-3.0.html>`_.
 
 The application itself is distributed under the `Zlib License <https://opensource.org/licenses/Zlib>`_.
