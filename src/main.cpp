@@ -18,6 +18,7 @@ struct QuitStruct{
     }
 
     static void exitApp(int sig){
+        qDebug() << "Exit with signal " << sig;
         QCoreApplication::exit(0);
     }
 };

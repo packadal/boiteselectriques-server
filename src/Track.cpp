@@ -11,8 +11,8 @@ Track::Track():
 {}
 
 Track::Track(const TrackData& data, Parameters<double> conf, QSettings* opt, int id):
-    m_id(id), m_file(data.file), m_name(data.name), m_options(opt),
-    m_soloState(false), m_activatedState(false)
+    m_id(id), m_file(data.file), m_name(data.name),
+    m_soloState(false), m_activatedState(false), m_options(opt)
 {
     m_volumePtr = std::make_shared<Amplify<double>>(conf);
     m_panPtr = std::make_shared<Pan<double>>(conf);
