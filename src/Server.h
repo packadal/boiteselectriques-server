@@ -16,9 +16,6 @@
 
 class SaveManager;
 
-#define EXPORT_FOLDER "/home/pi/songs/" /*< Files save/load folder*/
-#define FILES_EXTENSION "*.song" /*< Song files extension */
-
 struct Settings {
     QString key;
     QVariant value;
