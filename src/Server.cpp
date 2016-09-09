@@ -212,6 +212,7 @@ bool Server::initConf(QSettings *c) {
             c->setValue(it->key, it->value.toString());
     }
 
+    // Debugging
     QStringList lst = c->allKeys();
     for(QStringList::const_iterator k = lst.constBegin(); k<lst.constEnd(); k++)
         qDebug() << *k << " : " << c->value(*k).toString();
@@ -461,7 +462,7 @@ void Server::updateBeat(double t) { // in seconds
         m_previousBeat = time;
 
         sendBeatCount(time);
-        if(time == 8 || time == 16 || time == 24){ //sync
+        if(time%8 == 0){ //sync
             sendActivatedTracks();
             sendBeatCount(time);
         }

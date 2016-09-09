@@ -34,7 +34,7 @@ struct Settings {
  *
  * Handles the events and dispatch the corresponding actions
  */
-class Server : public /*QCoreApplication*/ QObject {
+class Server : public QObject {
     Q_OBJECT
     Q_PROPERTY(int tempo READ getTempo WRITE setTempo)
 
