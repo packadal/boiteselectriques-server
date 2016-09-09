@@ -7,11 +7,11 @@
 
 Track::Track():
     m_id(0), m_file(""), m_name(""),
-    m_soloState(false), m_activatedState(false), options(NULL)
+    m_soloState(false), m_activatedState(false), m_options(NULL)
 {}
 
 Track::Track(const TrackData& data, Parameters<double> conf, QSettings* opt, int id):
-    m_id(id), m_file(data.file), m_name(data.name), options(opt),
+    m_id(id), m_file(data.file), m_name(data.name), m_options(opt),
     m_soloState(false), m_activatedState(false)
 {
     m_volumePtr = std::make_shared<Amplify<double>>(conf);
@@ -88,11 +88,11 @@ void Track::notifyEnabled(bool enabled) {
 }
 
 void Track::reset() {
-    options->beginGroup("default");
+    m_options->beginGroup("default");
 
-    setVolume(options->value("volume").toInt());
-    setPan(options->value("pan").toInt());
-    setActivated(options->value("activation").toBool());
+    setVolume(m_options->value("volume").toInt());
+    setPan(m_options->value("pan").toInt());
+    setActivated(m_options->value("activation").toBool());
 
-    options->endGroup();
+    m_options->endGroup();
 }

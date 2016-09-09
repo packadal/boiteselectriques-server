@@ -41,17 +41,17 @@ class Server : public /*QCoreApplication*/ QObject {
     friend class SaveManager;
 
 private:
-    PlayThread* player; /*< Audio play manager */
-    SaveManager saveManager; /*< File handling manager */
-    SerialManager serialManager {this}; /*< Interface with serial port */
+    PlayThread* m_player; /*< Audio play manager */
+    SaveManager m_saveManager; /*< File handling manager */
+    SerialManager m_serialManager {this}; /*< Interface with serial port */
 
-    QSettings* options; /*< Config options */
+    QSettings* m_options; /*< Config options */
 
-    SongData song; /*< Actual song's data */
-    QString selSong; /*< Selected song's name */
-    int threshold;
-    int nbChannels;
-    QString currentFile;
+    SongData m_song; /*< Actual song's data */
+    QString m_selSong; /*< Selected song's name */
+    int m_threshold;
+    int m_nbChannels;
+    QString m_currentFile;
 
     bool m_loaded {false}; /*< Indicate if a song has been loaded */
     bool m_playing {false}; /*< Indicate if a song is playing */
@@ -62,8 +62,8 @@ private:
     int m_previousBeat {-1};
 
 
-    OscReceiver* receiver; /*< Receiving interface with OSC protocol */
-    OscSender* sender; /*< Sending interface with OSC protocol */
+    OscReceiver* m_receiver; /*< Receiving interface with OSC protocol */
+    OscSender* m_sender; /*< Sending interface with OSC protocol */
 
     /**
      * @brief Setup WiringPi interface
@@ -282,7 +282,7 @@ signals:
      * @brief Notify of a new threshold value
      * @param threshold New threshold value
      */
-    void updateThreshold(int threshold);
+    void updateThreshold(int m_threshold);
     /**
      * @brief Notify the threshold reset
      */

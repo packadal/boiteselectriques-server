@@ -175,17 +175,17 @@ public slots:
     void load(const SongData& s);
 
 private:
-    QSettings* options;
-    Parameters<double> conf; /*< Configuration data */
-    std::shared_ptr<Amplify<double>> masterVolume {new Amplify<double>(conf)};
-    std::shared_ptr<StreamingManager<double>> manager;
+    QSettings* m_options;
+    Parameters<double> m_conf; /*< Configuration data */
+    std::shared_ptr<Amplify<double>> m_masterVolume {new Amplify<double>(m_conf)};
+    std::shared_ptr<StreamingManager<double>> m_manager;
 
-    QVector<Track*> tracks; /*< List of the current song's tracks */
+    QVector<Track*> m_tracks; /*< List of the current song's tracks */
 
-    int bufferCount {}; /*< Buffer in which we are s*/
-    int maxBufferCount {}; /*< Total buffer count in a loop */
+    int m_bufferCount {}; /*< Buffer in which we are s*/
+    int m_maxBufferCount {}; /*< Total buffer count in a loop */
 
-    bool isPlaying {false};
+    bool m_isPlaying {false};
     int m_threshold;
 
     /**

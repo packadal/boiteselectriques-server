@@ -20,7 +20,7 @@ SerialManager::SerialManager(QObject *parent):
 }
 
 void SerialManager::stop() {
-    this->isRunning = false;
+    this->m_isRunning = false;
 }
 
 void SerialManager::run() {
@@ -58,13 +58,13 @@ void SerialManager::run() {
     int pin = 0;
     int hitavg = 0;
 
-    this->isRunning = true;
+    this->m_isRunning = true;
 
     //wiringPiSetupSys ();
 
     mcp3004Setup(BASE,SPI_CHAN);
 
-    while (this->isRunning){
+    while (this->m_isRunning){
 
        for(pin=0; pin<8; pin++){
 

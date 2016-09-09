@@ -51,8 +51,8 @@ protected:
     virtual void run();
 
 private:
-    bool isRunning {false}; /*< Status of the reading */
-    std::shared_ptr<QSerialPort> port; /*< Port to open */
+    bool m_isRunning {false}; /*< Status of the reading */
+    std::shared_ptr<QSerialPort> m_port; /*< Port to open */
 };
 
 #endif // SERIALMANAGER_H

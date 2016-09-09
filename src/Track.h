@@ -33,7 +33,7 @@ private:
     bool m_soloState;
     bool m_activatedState;
 
-    QSettings* options;
+    QSettings* m_options;
 
     std::shared_ptr<Amplify<double>> m_volumePtr; /*< Volume in the audio engine */
     std::shared_ptr<Pan<double>> m_panPtr; /*< Pan in the audio engine */
