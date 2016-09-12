@@ -42,11 +42,15 @@ void Server::ledOn(){
     std::system(c.toStdString().c_str());
 }
 
-void Server::ledOff(){
-    //digitalWrite(LED_VALUE, LOW);
+void Server::ledOff(int n){
+    //digitalWrite(n, LOW);
 
-    QString c = QStringLiteral("gpio write %1 0").arg(m_options->value("gpio/led").toInt());
+    QString c = QStringLiteral("gpio write %1 0").arg(n);
     std::system(c.toStdString().c_str());
+}
+
+void Server::ledOff(){
+    ledOff(m_options->value("gpio/led").toInt());
 }
 
 void Server::ledBlink(){
@@ -148,6 +152,7 @@ Server::Server(QSettings* opt):
 }
 
 Server::~Server() {
+    int led = m_options->value("gpio/led").toInt();
     qDebug() << "Stopping server...";
     stop();
 
@@ -171,12 +176,12 @@ Server::~Server() {
 
     qDebug() << "Deleting pointers...";
     delete m_player;
-
-    ledOff();
     delete m_options;
 
     qDebug() << "Stopping CoreApp...";
+
     QCoreApplication::exit(0);
+    ledOff(led);
 }
 
 int Server::getTempo() const {
@@ -435,9 +440,9 @@ void Server::switchBox(unsigned int i, int val) {
 }
 
 void Server::play() {
-    if(!m_loaded) {
-        if(load()) return;
-    }
+    if(!m_loaded)
+        if(load())
+            return;
 
     sendPlay();
     m_player->start();
@@ -445,13 +450,13 @@ void Server::play() {
 }
 
 void Server::stop() {
-    if(!m_loaded || !m_playing) return;
+    if(m_loaded && m_playing){
+        m_player->stop();
+        m_previousBeat = 0;
+        m_playing = false;
 
-    m_player->stop();
-    m_previousBeat = 0;
-    m_playing = false;
-
-    updateBeat(0);
+        updateBeat(0);
+    }
 }
 
 void Server::updateBeat(double t) { // in seconds
@@ -551,7 +556,7 @@ int Server::load() {
         try {
             stop();
 
-            QString file = EXPORT_FOLDER + m_selSong;
+            QString file = m_options->value("files/folder").toString() + m_selSong;
 
             if(!file.isEmpty()) {
                 m_currentFile = file;

@@ -20,10 +20,8 @@ struct Settings {
     QString key;
     QVariant value;
 
-    Settings(QString k, QVariant v){
-        key = k;
-        value = v;
-    }
+    Settings(QString k, QVariant v):
+        key(k), value(v){}
 };
 
 /**
@@ -258,15 +256,20 @@ public:
     bool initConf(QSettings *c);
 
     /**
-     * @brief Activate the configured LED
+     * @brief Activate the configured LED defined in config file
      */
     void ledOn();
     /**
-     * @brief Deactivate the configured LED
+     * @brief Deactivate the LED on pos n
+     * @param n
+     */
+    void ledOff(int n);
+    /**
+     * @brief Deactivate the LED defined in config file
      */
     void ledOff();
     /**
-     * @brief Make the LED blink
+     * @brief Make the LED defined in config file blink
      */
     void ledBlink();
 

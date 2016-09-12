@@ -50,7 +50,8 @@ public:
      * @param conf Default configuration data (volume, pan, mute)
      * @param id Track number (should be its position in the PlayThread's tracks vector)
      */
-    Track(const TrackData& data, Parameters<double> conf, QSettings* opt, int id);
+    Track(const TrackData& data, Parameters<double> conf,
+          QSettings* opt, int id);
 
     std::string getName() const;
     std::string getFile() const;

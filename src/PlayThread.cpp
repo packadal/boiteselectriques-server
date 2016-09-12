@@ -70,7 +70,9 @@ void PlayThread::timeHandle() {
     if(++m_bufferCount > m_maxBufferCount)
         m_bufferCount = 0;
 
-    emit actualBeatChanged(m_bufferCount * m_conf.bufferSize / double(m_conf.samplingRate));
+    emit actualBeatChanged(m_bufferCount
+                           * m_conf.bufferSize
+                           / double(m_conf.samplingRate));
 }
 
 void PlayThread::stop() {
@@ -159,20 +161,32 @@ void PlayThread::load(const SongData& s) {
         m_maxBufferCount = file->v(0).size() / m_conf.bufferSize;
         emit beatCountChanged(file->v(0).size() / double(m_conf.samplingRate));
 
-        chains[i] = Input_p(new SfxInputProxy<double>(new StereoAdapter<double>(new LoopInputProxy<double>(file)),
-                            new Sequence<double>(m_conf, m_tracks[i]->getVolumePtr(), m_tracks[i]->getPanPtr(), m_tracks[i]->getMutePtr() )));
+        chains[i] = Input_p(new SfxInputProxy<double>(
+                                new StereoAdapter<double>(
+                                    new LoopInputProxy<double>(file)),
+                            new Sequence<double>(m_conf,
+                                                 m_tracks[i]->getVolumePtr(),
+                                                 m_tracks[i]->getPanPtr(),
+                                                 m_tracks[i]->getMutePtr() )));
 
         emit songLoaded(i+1,track_count);
     }
 
     // Master
-    auto input = Input_p(new SfxInputProxy<double>(new SummationProxy<double>(new InputMultiplexer<double>(m_conf, chains)), m_masterVolume));
+    auto input = Input_p(new SfxInputProxy<double>(
+                             new SummationProxy<double>(
+                                 new InputMultiplexer<double>(m_conf, chains)),
+                             m_masterVolume));
 
     // Manager
     m_manager = std::make_shared<StreamingManager<double>>(std::move(input),
-              std::move(std::make_shared<RtAudioOutput<double>>(m_conf)),
-              std::bind(&PlayThread::timeHandle, this),
-                                                         m_conf);
+                                                           std::move(
+                                                               std::make_shared<RtAudioOutput<double>>(
+                                                                   m_conf)),
+                                                           std::bind(
+                                                               &PlayThread::timeHandle,
+                                                               this),
+                                                           m_conf);
 }
 
 bool PlayThread::isValidTrack(unsigned int track)
