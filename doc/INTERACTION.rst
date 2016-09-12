@@ -7,6 +7,7 @@ General informations
 To communicate, client and server use the OSC protocol.
 
 By default, the server uses the IP address ``192.170.0.1``, with the port ``9988`` to send messages and ``9989`` to receive them.
+These values can be changed in the configuration file.
 
 Protocol
 --------
@@ -97,4 +98,4 @@ The client can receive the following messages from the server to access its info
 
 ``/box/tracks_list <str>``
   Send the informations of the selected song's tracks, as ``<str>``.
-  ``<str>` is the concatenation of the songs' tracks' names, separated by the character ``|``.
+  ``<str>`` is the concatenation of the songs' tracks' names, separated by the character ``|``.

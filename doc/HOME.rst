@@ -6,10 +6,13 @@ Table of content
 ================
 
 *HOME*
- Presentation of the application
+  Presentation of the application.
+
+*COMPILING*
+  How to build the program from the source.
 
 *SETUP*
-  How to install and setup the server
+  How to install and setup the server.
 
 *INTERACTION*
   How client and server interact with each other.
