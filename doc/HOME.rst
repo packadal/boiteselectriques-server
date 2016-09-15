@@ -24,6 +24,9 @@ Table of content
 General informations
 ====================
 
+Licenses
+~~~~~~~~
+
 This documentation is formatted using the `reStructuredText <http://docutils.sourceforge.net/rst.html>`_ syntax, and is distributed under the Creative Commons BY-SA 4.0 license.
 
 The `Open Sound Control (OSC) packet manipulation library <http://www.rossbencina.com/code/oscpack>`_ is written and distributed under the `MIT license <https://opensource.org/licenses/mit-license.phpl>`_, with the following addition : 
@@ -33,3 +36,12 @@ The `Open Sound Control (OSC) packet manipulation library <http://www.rossbencin
 The `libaudiotool audio framework <https://github.com/jcelerier/libaudiotool>`_ is distributed under the `GNU GPL v3 <https://www.gnu.org/licenses/gpl-3.0.html>`_.
 
 The application itself is distributed under the `Zlib License <https://opensource.org/licenses/Zlib>`_.
+
+Notation
+~~~~~~~~
+
+In that document, you will often see commands that you can enter in an terminal, beginning either with a ``$`` or a ``#``, that you MUST NOT type.
+
+If the command starts with a ``$``, you just have to be a regular user to perform it (by default, ``pi``).
+
+If it's a ``#``, you NEED ``root`` privileges (sometimes, the ``sudo`` command is enough, but not always).

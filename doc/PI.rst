@@ -1,23 +1,50 @@
 Configuration Pi
 ================
 
-Distrib : Raspbian Jessie Lite
-Install (pour install auto : ajouter silentinstall au début de boot/commandline.txt, puis connexion SSH). 
+Raspbian installation
+---------------------
 
-Activate SPI::
-  
+The installation will be done on a Raspberry Pi, powered by the `*Raspbian Jessie Lite* <https://www.raspberrypi.org/downloads/raspbian/>`_ image. 
+
+You can follow the installation instructions for more information about how to write the image on an `SD Card <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`.
+
+If you have a screen and a USB keyboard
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you have a screen with a HDMI port, connect it to your Raspberry Pi and do the same with a USB keyboard. Then power your Raspberry Pi on and follow the onscreen instructions to perform the installation.
+
+If you don't
+~~~~~~~~~~~~
+
+If you don't have both a screen and a keyboard, you can still access it through SSH.
+
+To do that, once the image has been written on the card, mount its ``boot`` partition, open the ``commandline.txt`` file and add ``silentinstall`` at the beginning of the first line.
+
+Then, connect the Pi to your network (or directly to your computer, creating a local network !) with an Ethernet cable and power it on. You can scan your network with the ``nmap`` command to find your Pi IP address and connect you to it through SSH (default password : ``raspberry``)::
+
+  $ ssh pi@<your pi's IP>
+
+Server's requirements
+---------------------
+
+SPI
+~~~
+
+For the Boîtes Électriques Server's executable to be able to run correctly, you need to activate the SPI interface on the Pi. To do that, just type::
+
   # raspi-config
   
-  -> 9 Advanced Options -> A5 SPI -> <Yes> -> <Ok> -> <Finish>
-  
-Bugs::
+Then go to: ``9 Advanced Options`` -> ``A5 SPI`` -> ``<Yes>`` -> ``<Ok>`` -> ``<Finish>``
 
-  Si Setting locale failed : `Solution <https://www.thomas-krenn.com/en/wiki/Perl_warning_Setting_locale_failed_in_Debian>`_
-  # dpkg-reconfigure locales
+Warning : this must be done before executing the server (``be-server``), else it won't run.
   
-SETUP WIFI BRIDGE::
+Wifi bridge setup
+-----------------
 
-Dans /etc/network/interfaces::
+Network and tools
+~~~~~~~~~~~~~~~~~
+
+First, edit the ``/etc/network/interfaces`` file, and replace it with this::
   
   #config pont
   iface eth0 inet dhcp
@@ -31,11 +58,14 @@ Dans /etc/network/interfaces::
 
   iface default inet dhcp 
 
-Puis les utilitaires::
+Then, we need Hostapd and DNSMasq to setup the bridge and attribute IPs automatically::
 
-  $ sudo apt-get install hostapd dnsmasq (iptables ?)
+  $ sudo apt-get install hostapd dnsmasq
   
-Dans /etc/hostapd/hostapd.conf::
+Hostapd configuration
+~~~~~~~~~~~~~~~~~~~~~  
+  
+Edit the ``/etc/hostapd/hostapd.conf`` file and replace it with this::
 
   interface=wlan0
   driver=nl80211
@@ -53,7 +83,26 @@ Dans /etc/hostapd/hostapd.conf::
   rts_threshold=2347
   fragm_threshold=2346
   
-Dans /etc/dnsmasq.conf::
+Then ``/etc/default/hostapd``to make it run on startup::
+
+  DAEMON_CONF="/etc/hostapd/hostapd.conf"  
+ 
+Test it::
+
+  # systemctl start hostapd
+  
+You can check the service status with the following command::
+
+  # systemctl status hostapd
+ 
+And enable it with ``systemctl``::
+
+  # systemctl enable hostapd
+  
+DNSMasq
+~~~~~~~  
+  
+Edit the ``/etc/dnsmasq.conf`` file and replace it with this::  
 
   interface=wlan0
   listen-address=192.170.0.1
@@ -62,12 +111,28 @@ Dans /etc/dnsmasq.conf::
   domain-needed
   bogus-priv
   dhcp-range=192.170.0.50,192.170.0.150,12h
+ 
+Test it::
 
-Dans /etc/default/hostapd (pour hostapd au démarrage):
-
-  DAEMON_CONF="/etc/hostapd/hostapd.conf"
-
-On teste::
+  # systemctl start dnsmasq
   
-  sudo service dnsmasq start
-  sudo service hostapd start
+You can check the service status with the following command::
+
+  # systemctl status dnsmasq
+ 
+And enable it with ``systemctl``::
+
+  # systemctl enable dnsmasq  
+
+Bugs
+----
+
+If you have the following error::
+ 
+  Setting locale failed
+ 
+You can check the `following page <https://www.thomas-krenn.com/en/wiki/Perl_warning_Setting_locale_failed_in_Debian>`_, and run::
+ 
+  # dpkg-reconfigure locales
+  
+Then select the correct locales.  
