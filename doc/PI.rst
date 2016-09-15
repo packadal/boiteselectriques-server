@@ -4,33 +4,6 @@ Configuration Pi
 Distrib : Raspbian Jessie Lite
 Install (pour install auto : ajouter silentinstall au début de boot/commandline.txt, puis connexion SSH). 
 
-NOT SO SURE
----------------------------------------------------------------------------------------  
-On passe sur ``testing`` pour avoir tous les packages : ``/etc/apt/sources.list``::
-  
-  deb http://mirrordirector.raspbian.org/raspbian/ **jessie** main contrib non-free rpi
-  
-Devient::
-  
-  deb http://mirrordirector.raspbian.org/raspbian/ **testing** main contrib non-free rpi
-
-
-  $ sudo apt-get update && sudo apt-get dist-upgrade
-----------------------------------------------------------------------------------------
-  
-Git::
-  $ sudo apt-get install git
-  $ git clone https://github.com/hixe33/boiteselec-server
-
-
-Building::
-
-  $ sudo apt-get install build-essential qt5-qmake qt5-default libqt5serialport5-dev libsndfile1-dev liboscpack-dev librtaudio-dev
-
-WiringPi::
-
-KF5Archive::
- 
 Activate SPI::
   
   # raspi-config

@@ -9,10 +9,16 @@ Basic Installation
 
 Just clone the repository on the Raspberry Pi and follow the instructions of the ``COMPILING.rst`` page.
 
+To test the program, copy the ``share/run.sh`` script to the executable (``be-server``) directory, and run it (don't forget to ``chmod +x`` it if it doesn't want to be executed.
+
+WARNING : Be sure SPI has been activated, using the ``rapsi-config`` tool (cf ``PI.rst`` file for more details about how to set up the Raspberry Pi), or the server won't work.
+
 .. _daemonized:
 
 Daemonizing
 ~~~~~~~~~~~
+
+WARNING : ``root`` access is required for the following section.
 
 To make the server running in the background automatically on the RasPi startup, it's possible to daemonize it with a few steps.
 
@@ -47,19 +53,19 @@ Then, we give the right permissions to the daemonizing script and reload the sys
 
 We can then test the script::
 
-  # /etc/init.d/be-server start
+  # systemctl start be-server
   [ ok ] Starting be-server (via systemctl): be-server.service
   
-  # /etc/init.d/be-server stop
+  # systemctl stop be-server
   [....] Stopping be-server (via systemctl): be-server.service
 
 And add it to the startup scripts::
   
-  # update-rc.d be-server defaults
+  # systemctl enable be-server
 
 To remove it::
 
-  # update-rc.d -f be-server remove
+  # systemctl enable be-server
 
 Configuration
 -------------

@@ -5,16 +5,19 @@ Boîtes électriques - Server
 Table of content
 ================
 
-*HOME*
+*1 - HOME*
   Presentation of the application.
+  
+*2 - PI*
+  How to correctly set up the Raspberry Pi
 
-*SETUP*
-  How to install and setup the server.
-
-*COMPILING*
+*3 - COMPILING*
   How to build the program from the source.
 
-*API*
+*4 - SETUP*
+  How to install and setup the server's program.
+
+*5 - API*
   How client and server interact with each other.
   (Description of the protocol)
   
