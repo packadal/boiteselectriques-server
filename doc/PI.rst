@@ -6,7 +6,11 @@ Raspbian installation
 
 The installation will be done on a Raspberry Pi, powered by the `*Raspbian Jessie Lite* <https://www.raspberrypi.org/downloads/raspbian/>`_ image. 
 
-You can follow the installation instructions for more information about how to write the image on an `SD Card <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`.
+You can follow the installation instructions for more information about how to write the image on an `SD Card <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_.
+
+The follow one of the two sections' instructions, depending on your equipment, and update your Raspberry Pi::
+
+  # apt-get update && apt-get upgrade
 
 If you have a screen and a USB keyboard
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
