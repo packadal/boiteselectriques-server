@@ -1,4 +1,4 @@
-Compiling the project
+﻿Compiling the project
 =====================
 
 Dependencies

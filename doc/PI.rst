@@ -1,4 +1,4 @@
-Configuration Pi
+﻿Configuration Pi
 ================
 
 Raspbian installation
