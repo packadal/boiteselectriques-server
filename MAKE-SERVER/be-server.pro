@@ -51,13 +51,3 @@ PRE_TARGETDEPS += $$PWD/../deps/karchive-5.17.0/build/src/libKF5Archive.so.5
 RESOURCES += 
 
 OTHER_FILES += 
-
-
-#### Libraries ####
-  ##  Oscpack  ##
-# unix:!macx: LIBS += -L$$PWD/../../../git/oscpack/build/ -loscpack
-
-# INCLUDEPATH += $$PWD/../../../git/oscpack/src
-# DEPENDPATH += $$PWD/../../../git/oscpack/src
-
-#unix:!macx: PRE_TARGETDEPS += $$PWD/../../../git/oscpack/build/liboscpack.a

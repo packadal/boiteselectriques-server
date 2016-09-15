@@ -135,7 +135,7 @@ The following options are available :
 Run
 ---
 
-To start the server, just run ``./be-server``, or ``sudo /etc/init.d/be-server start`` if the server has been daemonized_.
+To start the server, just run ``./be-server``, or ``sudo systemctl start be-server.service`` if the server has been daemonized_.
 
 The following options are available :
 

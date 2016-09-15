@@ -47,7 +47,7 @@ First, clone the repository on the Raspberry Pi, either directly from Github or 
   
   $ git clone https://github.com/hixe33/boiteselec-server
   
-Then, we need to generate the Makefile before finally compiling the sources::
+Then, we need to generate the Makefile from the QMake file before finally compiling the sources::
 
   $ mkdir boiteselec-server/build
   $ qmake -config release -o boiteselec-server/build/Makefile boiteselec-server/src/be-server.pro
