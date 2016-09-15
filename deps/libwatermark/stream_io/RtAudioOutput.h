@@ -1,8 +1,8 @@
 #pragma once
 
 
-//#include <RtAudio.h>
-#include <rtaudio/RtAudio.h>
+#include <RtAudio.h>
+//#include <rtaudio/RtAudio.h>
 #include "StreamingOutputInterface.h"
 #include "mathutils/math_util.h"
 #include <functional>

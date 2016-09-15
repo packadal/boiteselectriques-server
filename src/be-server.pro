@@ -1,6 +1,5 @@
 QT += core serialport
 QT -= gui
-CONFIG += console
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += serialport
 
@@ -10,7 +9,7 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -std=c++1y
 
 QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS_RELEASE += -Ofast -march=native -flto -fopenmp
+QMAKE_CXXFLAGS_RELEASE += -Ofast -march=armv6 -flto -fopenmp
 QMAKE_LFLAGS_RELEASE -= -Wl,-O1
 QMAKE_LFLAGS_RELEASE += -Wl,-O3 -Wl,-flto
 
@@ -19,40 +18,37 @@ QMAKE_CXXFLAGS_DEBUG -= -O2
 QMAKE_CXXFLAGS_DEBUG += -O0 -Wno-unknown-pragmas
 
 SOURCES += main.cpp\
+	Server.cpp \
         Track.cpp \
-        PlayThread.cpp \
+	PlayThread.cpp \
 	SaveManager.cpp \
-        SerialManager.cpp \
-    Server.cpp
+        SerialManager.cpp
 
-HEADERS += \
-        Track.h \
-        PlayThread.h \
+HEADERS += Server.h \
+	Track.h \
+	PlayThread.h \
         SongData.h \
 	SaveManager.h \
-        SerialManager.h \
-    Server.h
+        SerialManager.h
 
-INCLUDEPATH +=  $$PWD/../../libaudiotool/src/libwatermark
-DEPENDPATH += $$PWD/../../libaudiotool/src/libwatermark
+INCLUDEPATH += 	$$PWD/../deps/libwatermark
+DEPENDPATH += $$PWD/../deps/libwatermark
 
-LIBS+= -lgomp -lsndfile -lwiringpi
-#LIBS+= -lportaudiocpp -lportaudio
+INCLUDEPATH += /usr/include/oscpack
+
+# KArchive
+INCLUDEPATH += /usr/local/include/KF5/KArchive
+DEPENDPATH += /usr/local/lib/arm-linux-gnueabihf
+PRE_TARGETDEPS += /usr/local/lib/arm-linux-gnueabihf/libKF5Archive.so.5
+
+
+LIBS+= -lgomp -lsndfile
 LIBS+= -lrtaudio
 LIBS+= -lasound
-#LIBS+= -lgcov -lavcodec -lavformat -lavutil
+LIBS+= -loscpack
+LIBS+= -lwiringPi
+LIBS+= -lKF5Archive
 
+RESOURCES += 
 
-INCLUDEPATH += /usr/local/include/KF5/KArchive  /usr/include/KF5/KArchive
-LIBS += -lKF5Archive
-
-#### Libraries ####
-  ##  Oscpack  ##
-linux-g++ {
-unix:!macx: LIBS += -L$$PWD/../../deps/linux/oscpack/ -loscpack
-
-INCLUDEPATH += $$PWD/../../deps/src/oscpack
-DEPENDPATH += $$PWD/../../deps/src/oscpack
-
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../deps/linux/oscpack/liboscpack.a
-}
+OTHER_FILES += 

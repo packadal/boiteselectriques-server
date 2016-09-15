@@ -18,8 +18,9 @@ daemon_NAME="be-server" # Program's name (same as the executable)
 # Description:		Server for the Boites Electriques
 ### END INIT INFO
 
- 
 PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+LD_LIBRARY_PATH=:/usr/local/lib/arm-linux-gnueabihf/ 
+export LD_LIBRARY_PATH
  
 test -x $DAEMON || exit 0
  
