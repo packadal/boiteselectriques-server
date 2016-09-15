@@ -37,7 +37,7 @@ Now, we can compile KArchive::
 Additional notes
 ~~~~~~~~~~~~~~~~
 
-If there is any problem with those dependencies, or if you can't download the ``liboscpack-dev`` from the official Raspbian repo, you can download the sources from our git repo : <https://github.com/hixe33/boiteselectriques-server-deps>_
+If there is any problem with those dependencies, or if you can't download the ``liboscpack-dev`` from the official Raspbian repo, you can download the sources from `our git repo <https://github.com/hixe33/boiteselectriques-server-deps>`_
 
 Building the program
 --------------------
