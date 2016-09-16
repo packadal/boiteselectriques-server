@@ -6,8 +6,8 @@ Dependencies
 
 Installation on a new Raspberry Pi image (Raspbian Jessie Lite)
 
-Divers
-~~~~~~
+Packaged dependencies
+~~~~~~~~~~~~~~~~~~~~~
 
 First, let's download the basic tools for compilation, plus the server's dependencies, from the official repo::
 
@@ -60,4 +60,4 @@ Now you're all set to test the program !
 Additional notes
 ~~~~~~~~~~~~~~~~
 
-If there is any ``#include`` problem at compilation, don't forget to check where all the libraries are installed (``.h`` and ``.so`` files) and to update the QMake file (``src/be-server.pro``) according to their locations.
+If there is any ``#include`` problem during compilation, don't forget to check where all the libraries are installed (``.h`` and ``.so`` files) and to update the QMake file (``src/be-server.pro``) according to their locations.
