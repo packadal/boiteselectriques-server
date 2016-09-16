@@ -65,7 +65,7 @@ And add it to the startup scripts::
 
 To remove it::
 
-  # systemctl enable be-server
+  # systemctl disable be-server
 
 Configuration
 -------------
