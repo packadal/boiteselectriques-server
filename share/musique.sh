@@ -1,9 +1,14 @@
 #!/bin/bash
 
 ######
-# Chercher tous les fichiers .song sur la clef USB
-# Les copiers dans /home/ubuntu/songs
+# Copy the $extension files from the root folder (/) 
+# of a USB key to the $destination folder
+#
+# $1 : USB key's kernel name
 ######
+
+extension="song"
+destination="/home/pi/songs"
 
 #export DISPLAY=":0"
 #notify-send "Copying new songs... Please wait."
@@ -11,7 +16,7 @@
 gpio mode 5 out
 gpio write 5 1
 
-cp -n /media/song_usb/*.song /home/ubuntu/songs
+cp -n /dev/$1/*.$extension $destination
 sync
 umount /media/song_usb
 

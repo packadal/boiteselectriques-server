@@ -141,7 +141,14 @@ The following options are available :
 Run
 ---
 
-To start the server, just run ``./be-server``, or ``sudo systemctl start be-server.service`` if the server has been daemonized_.
+To test the server, the location of KArchive binary is required to run the program correctly::
+  
+  $ export LD_LIBRARY_PATH=:/usr/local/lib/arm-linux-gnueabihf/ 
+  $ ./be-server
+
+Or, if the server has been daemonized_ (you can't give arguments to the command in that case)::
+  
+  $ sudo systemctl start be-server.service
 
 The following options are available :
 
