@@ -63,6 +63,35 @@ To be able to play the songs correctly, ALSA needs a bit of configuration. To do
 
   defaults.ctl.!card 1;
   
+Auto-load .song files from a USB key
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+WARNING: You first need to clone the server's repository on the Pi an open its folder (see ``3-COMPILING.rst`` for details about the procedure).
+
+First, open the ``share/import_music.sh`` to setup the copy script. You can change the following variables:
+
+``extension``
+  Extension of the song files. Default: ``"song"``.
+
+``destination``
+  Folder where to copy the files. Default: ``"/home/pi/songs"``.
+
+``user``
+  Name of the user that owns the ``destination`` folder. Default: ``"pi"``.
+
+``led``
+  LED's ``wiringpi`` GPIO identifier (to signal the script is running). Default: ``"5"``
+
+Once it's done (you can also leave the default values), copy the script to ``/usr/local/bin``, and the ``udev`` rule file to ``/etc/udev/rules.d``::
+
+  # cp share/import_music.sh /usr/local/bin/
+  # cp share/89-usbcopy.rules /etc/udev/rules.d/
+
+The system should automatically detect the new rule, and will automatically copy the .song (or whatever you want) files from a USB key/drive to the folder you choosed.
+Note that a LED should be activated during the whole operation, so don't touch the key or drive during that time.
+
+
+
 Wifi bridge setup
 -----------------
 
