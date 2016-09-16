@@ -41,6 +41,27 @@ For the Boîtes Électriques Server's executable to be able to run correctly, yo
 Then go to: ``9 Advanced Options`` -> ``A5 SPI`` -> ``<Yes>`` -> ``<Ok>`` -> ``<Finish>``
 
 Warning : this must be done before executing the server (``be-server``), else it won't run.
+
+FFMPEG
+~~~~~~
+
+To read the songs, the ``ffmpeg`` program is required. However, it is not directly available from the official Raspbian repo.
+
+Fortunately, the deb-multimedia repo offers a Raspberry Pi-compatible package for ``fmpeg``. So, you must add this repo to your ``/etc/apt/sources.list``, by insering the fllowing line in the file::
+
+  deb http://www.deb-multimedia.org jessie main non-free
+
+Then, update your packages cache, import the repo's GPG key and install ``ffmpeg``::
+
+  # apt-get update && apt-get install deb-multimedia-keyring
+  # apt-get install ffmpeg
+
+ALSA
+~~~~
+
+To be able to play the songs correctly, ALSA needs a bit of configuration. To do so, just open the ``/etc/asound.conf`` file and replace its content with this :
+
+  defaults.ctl.!card 1;
   
 Wifi bridge setup
 -----------------
@@ -127,6 +148,8 @@ You can check the service status with the following command::
 And enable it with ``systemctl``::
 
   # systemctl enable dnsmasq  
+
+Now, you are ready to compile the server !
 
 Bugs
 ----
