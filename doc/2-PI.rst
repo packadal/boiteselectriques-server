@@ -8,7 +8,7 @@ The installation will be done on a Raspberry Pi, powered by the `*Raspbian Jessi
 
 You can follow the installation instructions for more information about how to write the image on an `SD Card <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_.
 
-The follow one of the two sections' instructions, depending on your equipment, and update your Raspberry Pi::
+Then follow one of the two sections' instructions, depending on your equipment, connect your Pi to the Internet and update your Raspberry Pi::
 
   # apt-get update && apt-get upgrade
 
