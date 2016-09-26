@@ -120,8 +120,12 @@ The following options are available :
 ~~~~~~~~~~~~~~~~~~
 
 ``led``
-  LED's WiringPi identifier (to use with the ``gpio`` command).
+  Green LED's WiringPi identifier (to use with the ``gpio`` command).
   Default : ``6``
+
+``warning``
+  Red LED's WiringPi identifier (to use with the ``gpio`` command).
+  Default : ``5``
 
 ``[osc]`` section
 ~~~~~~~~~~~~~~~~~

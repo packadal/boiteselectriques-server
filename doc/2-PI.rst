@@ -63,6 +63,8 @@ To be able to play the songs correctly, ALSA needs a bit of configuration. To do
 
   defaults.ctl.!card 1;
   
+If there is any problem to access the ``alsamixer``, remove (or simply move or rename) the ``/etc/asound.conf`` file.
+  
 Auto-load .song files from a USB key
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -255,6 +255,12 @@ public:
      */
     bool initConf(QSettings *c);
 
+
+    /**
+     * @brief Activate the LED on pos n
+     * @param n
+     */
+    void ledOn(int n);
     /**
      * @brief Activate the configured LED defined in config file
      */
@@ -272,7 +278,6 @@ public:
      * @brief Make the LED defined in config file blink
      */
     void ledBlink();
-
 signals:
     /**
      * @brief Notify the need to reload the actual song

@@ -25,7 +25,8 @@
 #define DEFAULT_PAN 0
 #define DEFAULT_ACTIVATION false
 
-#define DEFAULT_LED 6 /*< wiringPi LED's GPIO identifier */
+#define DEFAULT_LED 6 /*< wiringPi green LED's GPIO identifier */
+#define DEFAULT_WARNING_LED 5 /*< wiringPi red LED's GPIO identifier */
 
 void Server::ledSetup(){
     wiringPiSetupSys();
@@ -33,13 +34,19 @@ void Server::ledSetup(){
 
     QString c = QStringLiteral("gpio mode %1 out").arg(m_options->value("gpio/led").toInt());
     std::system(c.toStdString().c_str());
+    c = QStringLiteral("gpio mode %1 out").arg(m_options->value("gpio/warning").toInt());
+    std::system(c.toStdString().c_str());
+}
+
+void Server::ledOn(int n){
+    //digitalWrite(LED_VALUE, HIGH);
+
+    QString c = QStringLiteral("gpio write %1 1").arg(n);
+    std::system(c.toStdString().c_str());
 }
 
 void Server::ledOn(){
-    //digitalWrite(LED_VALUE, HIGH);
-
-    QString c = QStringLiteral("gpio write %1 1").arg(m_options->value("gpio/led").toInt());
-    std::system(c.toStdString().c_str());
+    ledOn(m_options->value("gpio/led").toInt());
 }
 
 void Server::ledOff(int n){
@@ -206,6 +213,7 @@ bool Server::initConf(QSettings *c) {
     default_settings.append(Settings("files/extension", DEFAULT_EXTENSION));
 
     default_settings.append(Settings("gpio/led", DEFAULT_LED));
+    default_settings.append(Settings("gpio/warning", DEFAULT_WARNING_LED));
 
     default_settings.append(Settings("osc/ip", DEFAULT_IP));
     default_settings.append(Settings("osc/sender", DEFAULT_SENDER));
@@ -549,6 +557,7 @@ void Server::sendMsgReady(bool isReady) {
 }
 
 int Server::load() {
+    ledOn(m_options->value("gpio/warning").toInt());
     sendSongsList();
     sendThreshold();
 
@@ -570,14 +579,19 @@ int Server::load() {
 
                 sendTracksCount();
 
+                ledOff(m_options->value("gpio/warning").toInt());
                 return 0;
             }
+            ledOff(m_options->value("gpio/warning").toInt());
             return 1;
         } catch(std::exception& e) {
             qCritical() << tr("LOADING ERROR :") << e.what();
+            ledOff(m_options->value("gpio/warning").toInt());
             return 1;
         }
     }//end check selsong
+
+    ledOff(m_options->value("gpio/warning").toInt());
     return 1;
 }
 

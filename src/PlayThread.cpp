@@ -129,6 +129,7 @@ void PlayThread::switchBox(const unsigned int track) {
 
 void PlayThread::setThreshold(const unsigned int threshold){
     m_threshold = (99 -  threshold) * 4 + 100;
+    m_options->setValue("default/threshold", m_threshold);
 }
 
 void PlayThread::resetThreshold() {
