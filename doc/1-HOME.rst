@@ -35,7 +35,7 @@ The `Open Sound Control (OSC) packet manipulation library <http://www.rossbencin
 
 The `libaudiotool audio framework <https://github.com/jcelerier/libaudiotool>`_ is distributed under the `GNU GPL v3 <https://www.gnu.org/licenses/gpl-3.0.html>`_.
 
-The application itself is distributed under the `Zlib License <https://opensource.org/licenses/Zlib>`_.
+The application itself is distributed under the `CeCILL 2.1 License <https://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html>`_.
 
 Notation
 ~~~~~~~~
