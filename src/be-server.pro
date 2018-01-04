@@ -6,7 +6,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += serialport
 TARGET = be-server
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -std=c++1y
+QMAKE_CXXFLAGS += -std=c++1y -Wall -Wextra
 
 QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -Ofast -march=armv6 -flto -fopenmp
