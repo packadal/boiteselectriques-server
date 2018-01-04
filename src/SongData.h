@@ -13,42 +13,37 @@
  * @brief Informations of a track
  */
 struct TrackData {
-    TrackData() = default;
-    TrackData(TrackData&&) = default;
-    TrackData(const TrackData&) = delete;
+  TrackData() = default;
+  TrackData(TrackData&&) = default;
+  TrackData(const TrackData&) = delete;
 
-    TrackData(const std::string n,
-              const std::string f,
-              const double v,
-              const double p):
-        name(n),
-        file(f),
-        volume(v),
-        pan(p) {
+  TrackData(const std::string n,
+            const std::string f,
+            const double v,
+            const double p)
+      : name(n), file(f), volume(v), pan(p) {}
 
-    }
-
-    TrackData& operator=(TrackData&&) = default;
-    TrackData& operator=(const TrackData&) = delete;
-    const std::string name {};
-    const std::string file {}; /*< Track's file name */
-    const double volume {};
-    const double pan {};
+  TrackData& operator=(TrackData&&) = default;
+  TrackData& operator=(const TrackData&) = delete;
+  const std::string name{};
+  const std::string file{}; /*< Track's file name */
+  const double volume{};
+  const double pan{};
 };
 
 /**
  * @brief Informations of the whole song
  */
 struct SongData {
-    SongData() = default;
-    SongData(SongData&&) = default;
-    SongData& operator=(SongData&&) = default;
+  SongData() = default;
+  SongData(SongData&&) = default;
+  SongData& operator=(SongData&&) = default;
 
-    std::vector<TrackData> tracks {}; /*< Song's list of tracks */
-    int tempo {};
-    std::string name {};
-    int sigNumerator {};
-    int sigDenominator {};
+  std::vector<TrackData> tracks{}; /*< Song's list of tracks */
+  int tempo{};
+  std::string name{};
+  int sigNumerator{};
+  int sigDenominator{};
 };
 
-#endif // SONGDATA_H
+#endif  // SONGDATA_H
