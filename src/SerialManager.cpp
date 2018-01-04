@@ -52,7 +52,7 @@ void SerialManager::run() {
 #else  // On Raspberry Pi
   int PadCutOff[8] = {300, 300, 300, 300, 300, 300, 300, 300};
   int MaxPlayTime[8] = {90, 90, 90, 90, 90, 90, 90, 90};
-  bool ActivePad[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  bool ActivePad[8] = {false, false, false, false, false, false, false, false};
   int PinPlayTime[8] = {0, 0, 0, 0, 0, 0, 0, 0};
   int pin = 0;
   int hitavg = 0;

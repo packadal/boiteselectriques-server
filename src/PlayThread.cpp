@@ -12,7 +12,7 @@
 #include <stream_io/RtAudioOutput.h>
 #include <QDebug>
 
-PlayThread::PlayThread(QSettings* c) : QThread(0), m_options(c) {
+PlayThread::PlayThread(QSettings* c) : QThread(nullptr), m_options(c) {
   m_options->beginGroup("default");
   setThreshold(m_options->value("threshold").toInt());
   m_options->endGroup();
@@ -90,8 +90,8 @@ void PlayThread::reset() {
   setMasterVolume(m_options->value("master").toInt());
   m_options->endGroup();
 
-  for (int i = 0; i < m_tracks.size(); i++)
-    m_tracks[i]->reset();
+  for (auto& track : m_tracks)
+    track->reset();
 }
 
 void PlayThread::solo(const unsigned int track, const bool state) {
@@ -101,9 +101,9 @@ void PlayThread::solo(const unsigned int track, const bool state) {
     if (state) {
       m_tracks[track]->setMute(false);
 
-      for (int i = 0; i < m_tracks.size(); i++)
-        if (!m_tracks[i]->isSolo())
-          m_tracks[i]->setMute(true);
+      for (auto& track : m_tracks)
+        if (!track->isSolo())
+          track->setMute(true);
     } else {
       bool noMoreSolo = true;
       for (int i = 0; i < m_tracks.size() && noMoreSolo; i++)
@@ -111,8 +111,8 @@ void PlayThread::solo(const unsigned int track, const bool state) {
           noMoreSolo = false;
 
       if (noMoreSolo)
-        for (int i = 0; i < m_tracks.size(); i++)
-          m_tracks[i]->setMute(!m_tracks[i]->isActivated());
+        for (auto& track : m_tracks)
+          track->setMute(!track->isActivated());
       else
         m_tracks[track]->setMute(true);
     }
@@ -139,8 +139,8 @@ void PlayThread::load(const SongData& s) {
   // Reset to 0
   m_bufferCount = 0;
   int track_count = s.tracks.size();
-  for (int i = 0; i < m_tracks.size(); i++)
-    delete m_tracks[i];
+  for (auto& track : m_tracks)
+    delete track;
   m_tracks.clear();
   m_manager.reset();
 
@@ -150,7 +150,7 @@ void PlayThread::load(const SongData& s) {
 
 #pragma omp parallel for
   for (int i = 0; i < track_count; i++) {
-    Track* t = new Track(s.tracks[i], m_conf, m_options, i);
+    auto* t = new Track(s.tracks[i], m_conf, m_options, i);
     connect(t, &Track::onActivationSwitch, this,
             &PlayThread::onEnablementChanged);
     m_tracks[i] = t;
@@ -175,8 +175,7 @@ void PlayThread::load(const SongData& s) {
 
   // Manager
   m_manager = std::make_shared<StreamingManager<double>>(
-      std::move(input),
-      std::move(std::make_shared<RtAudioOutput<double>>(m_conf)),
+      std::move(input), std::make_shared<RtAudioOutput<double>>(m_conf),
       std::bind(&PlayThread::timeHandle, this), m_conf);
 }
 

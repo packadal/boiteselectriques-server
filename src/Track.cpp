@@ -11,7 +11,7 @@ Track::Track()
       m_name(""),
       m_soloState(false),
       m_activatedState(false),
-      m_options(NULL) {}
+      m_options(nullptr) {}
 
 Track::Track(const TrackData& data,
              Parameters<double> conf,
