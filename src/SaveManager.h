@@ -8,13 +8,15 @@
  * @brief File saving interface
  */
 
-#include <kzip.h>
 #include <QFileInfo>
+#include <QIODevice>
 #include <QObject>
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QVector>
 #include <memory>
+
+#include <kzip.h>
 
 class Server;
 

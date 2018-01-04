@@ -61,7 +61,7 @@ class StreamingManager: public ManagerBase
             auto audio = getAudio<data_type>(buffer); // Should be stereo.
             auto interleaved = MathUtil::interleave(audio);
 
-            for(int i = 0; i < interleaved.size(); i++)
+            for(size_t i = 0; i < interleaved.size(); i++)
             {
                 out[i] = interleaved[i];
             }

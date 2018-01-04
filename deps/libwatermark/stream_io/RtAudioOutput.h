@@ -93,10 +93,10 @@ private:
 
 
 int generate(void *outputBuffer,
-             void *inputBuffer,
+             void * /*inputBuffer*/,
              unsigned int nFrames,
-             double streamTime,
-             RtAudioStreamStatus status,
+             double /*streamTime*/,
+             RtAudioStreamStatus /*status*/,
              void *userData)
 {
     auto obj = static_cast<RtAudioOutput<float>*>(userData);
