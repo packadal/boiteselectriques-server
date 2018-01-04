@@ -77,15 +77,10 @@ private:
      */
     void sendMsgThreshold(int t);
     /**
-     * @brief Notify the client of a box activation
-     * @param chan Track number
-     */
-    void sendMsgBoxActivation(int chan);
-    /**
      * @brief Send the activated tracks' numbers to the client
      * @param tracks Tracks numbers
      *
-     * Called each 8 beats, to keep the client synchronized
+     * Called every 8 beats, to keep the client synchronized
      */
     void sendMsgActivatedTracks(int tracks);
     /**
@@ -365,12 +360,6 @@ public slots:
 
     // Perform eventual calculations and then call the private sending functions
 
-    /**
-     * @brief Notify the client of the activation of a box
-     * @param i Track (box) number
-     * @param val Sensor value
-     */
-    void sendBoxActivation(unsigned int i, int val);
     /**
      * @brief Send the actual beat count
      * @param beat Beat count

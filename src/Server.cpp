@@ -106,8 +106,6 @@ Server::Server(QSettings* opt):
 
     connect(&m_serialManager,	&SerialManager::boxActivated,
             this,			&Server::switchBox);
-    connect(&m_serialManager,	&SerialManager::boxActivated,
-            this,			&Server::sendBoxActivation);
 
     m_serialManager.start();
 
@@ -252,12 +250,6 @@ void Server::sendPlay()
 
 void Server::sendTracksCount() {
     sendMsgTracksCount(m_player->getTracksCount());
-}
-
-void Server::sendBoxActivation(unsigned int i, int val) {
-    if(val >= m_player->getThreshold()){
-        sendMsgBoxActivation(i);
-    }
 }
 
 void Server::sendBeatCount(unsigned int i) {
@@ -445,6 +437,7 @@ void Server::switchBox(unsigned int i, int val) {
     if(val >= m_player->getThreshold()) {
         m_player->switchBox(i);
     }
+    sendActivatedTracks();
 }
 
 void Server::play() {
@@ -509,11 +502,6 @@ void Server::setTempo(unsigned int arg) {
 void Server::sendMsgThreshold(int t) {
     m_sender->send(osc::MessageGenerator()("/box/sensor", t));
     qDebug() << "sent /box/sensor" << t;
-}
-
-void Server::sendMsgBoxActivation(int chan) {
-    m_sender->send(osc::MessageGenerator()("/box/enable_out", chan));
-    qDebug() << "sent /box/enable_out" << chan;
 }
 
 void Server::sendMsgActivatedTracks(int tracks) {
