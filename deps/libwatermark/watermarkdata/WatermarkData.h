@@ -155,7 +155,7 @@ class WatermarkData
 					e++;
 
 			if(otherBits.size() < bits.size())
-				e += std::abs(bits.size() - otherBits.size());
+                e += bits.size() - otherBits.size();
 			return e;
 		}
 
