@@ -11,7 +11,7 @@
 
 SaveManager::SaveManager(QObject* parent) : QObject(parent) {}
 
-SongData SaveManager::load(const QString loadpath) {
+SongData SaveManager::load(const QString& loadpath) {
   //// Temp. dir creation ////
   tempdir.reset(new QTemporaryDir);
 
@@ -77,7 +77,7 @@ SongData SaveManager::load(const QString loadpath) {
   return sd;
 }
 
-void SaveManager::save(const QString savepath, Server* manager) {
+void SaveManager::save(const QString& savepath, Server* manager) {
   //// Opening of .ini file in tempdir
   QStringList nameFilter("*.ini");
   QDir directory(tempdir->path());

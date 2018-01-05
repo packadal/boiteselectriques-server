@@ -44,14 +44,14 @@ class SaveManager : public QObject {
    * @param name Filename
    * @return Corresponding song data
    */
-  SongData load(const QString name);
+  SongData load(const QString& name);
 
   /**
    * @brief Save the parameters (volume, pan, ...)
    * @param name Filename
    * @param manager Audio server manager (pointer)
    */
-  void save(const QString name, Server* manager);
+  void save(const QString& name, Server* manager);
 
  signals:
   /**
