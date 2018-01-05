@@ -138,6 +138,10 @@ Server::Server(QSettings* opt) : m_options(opt) {
   m_receiver->addHandler("/box/sync", std::bind(&Server::handle__box_sync, this,
                                                 std::placeholders::_1));
 
+  m_receiver->addHandler(
+      "/box/delete_song",
+      std::bind(&Server::handle__box_deleteSong, this, std::placeholders::_1));
+
   m_receiver->run();
 }
 
@@ -534,6 +538,15 @@ void Server::sendMsgTracksList(const char* list) {
 void Server::sendMsgReady(bool isReady) {
   m_sender->send(osc::MessageGenerator()("/box/ready", isReady));
   qDebug() << "sent /box/ready" << isReady;
+}
+
+void Server::handle__box_deleteSong(osc::ReceivedMessageArgumentStream args) {
+  const char* receptSong;
+  args >> receptSong;
+  qDebug() << "received /box/delete_song" << receptSong;
+
+  QFile::remove(m_options->value("files/folder").toString() + receptSong);
+  sendSongsList();
 }
 
 int Server::load() {

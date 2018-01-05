@@ -122,6 +122,13 @@ class Server : public QObject {
    *******************/
 
   /**
+   * @brief delete_song event handling
+   * @param args the name of the song to delete
+   *
+   * Remove a local song file
+   */
+  void handle__box_deleteSong(osc::ReceivedMessageArgumentStream args);
+  /**
    * @brief update_threshold event handling
    * @param args New threshold value
    *
