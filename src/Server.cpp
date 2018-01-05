@@ -257,7 +257,7 @@ void Server::sendSongsList() {
                               << m_options->value("extension").toString());
   QStringList fileList = exportFolder.entryList();
   QString str = fileList.join("|");
-  QByteArray list = str.toLatin1();
+  QByteArray list = str.toUtf8();
   const char* c_list = list.data();
 
   m_options->endGroup();
