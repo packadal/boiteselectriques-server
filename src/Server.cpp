@@ -398,8 +398,7 @@ void Server::handle__box_selectSong(osc::ReceivedMessageArgumentStream args) {
   if (!so.isEmpty())
     m_selSong = so;
 
-  connect(this, SIGNAL(actionLoad()), this, SLOT(load()));
-  emit actionLoad();
+  load();
 }
 
 void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {

@@ -273,10 +273,6 @@ class Server : public QObject {
   void ledBlink();
  signals:
   /**
-   * @brief Notify the need to reload the actual song
-   */
-  void actionLoad();
-  /**
    * @brief Notify of a new threshold value
    * @param threshold New threshold value
    */
