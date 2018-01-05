@@ -375,6 +375,11 @@ class Server : public QObject {
    */
   void sendTracksCount();
   /**
+   * @brief Send the song's tracks names, in the form of a string where the
+   * different track names are separated by the '|' character
+   */
+  void sendTracksList();
+  /**
    * @brief Notify the client of the loading state
    * @param isReady Server's loading state
    *

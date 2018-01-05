@@ -237,6 +237,10 @@ void Server::sendTracksCount() {
   sendMsgTracksCount(m_player->getTracksCount());
 }
 
+void Server::sendTracksList() {
+  sendMsgTracksList(m_saveManager.trackList());
+}
+
 void Server::sendBeatCount(unsigned int i) {
   sendMsgBeatCount(i);
 }
@@ -409,8 +413,11 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
   sendThreshold();
 
   sendSongTitle();
+  sendTracksList();
   sendTracksCount();
   sendActivatedTracks();
+
+  sendReady(m_player->getTracksCount() > 0);
 }
 
 void Server::reset() {

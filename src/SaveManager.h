@@ -53,12 +53,20 @@ class SaveManager : public QObject {
    */
   void save(const QString& name, Server* manager);
 
+  /**
+   * @return the track list as a '|' concatenated string
+   */
+  const char* trackList() const { return m_trackList.data(); }
+
  signals:
   /**
    * @brief Notify of a new tracks list
    * @param list Tracks list
    */
   void updatedTracksList(const char* list);
+
+ private:
+  QByteArray m_trackList = {};
 };
 
 #endif  // SAVEMANAGER_H

@@ -44,34 +44,31 @@ SongData SaveManager::load(const QString& loadpath) {
   sd.sigNumerator = settings.value("General/sigNumerator").toInt();
   sd.sigDenominator = settings.value("General/sigDenominator").toInt();
 
-  QString temp;
-  int t = 0;
   bool end = false;
 
+  QStringList tracks;
+
   for (int i = 0; i < count; ++i) {
+    const QString trackName =
+        settings.value(QString("Track%1/name").arg(i)).toString();
     sd.tracks.emplace_back(
-        settings.value(QString("Track%1/name").arg(i)).toString().toStdString(),
+        trackName.toStdString(),
         (tempdir->path() + "/" +
          settings.value(QString("Track%1/filename").arg(i)).toString())
             .toStdString(),
         settings.value(QString("Track%1/volume").arg(i)).toInt(),
         settings.value(QString("Track%1/pan").arg(i)).toInt());
 
-    QString track_name =
-        settings.value(QString("Track%1/name").arg(i)).toString();
-    temp = temp + track_name;
-    t++;
-
-    if (t != count)
-      temp = temp + "|";
+    tracks << trackName;
 
     if (i == count - 1)
       end = true;
   }
 
   if (end) {
-    QByteArray TrackName = temp.toUtf8();
-    emit updatedTracksList(TrackName.data());
+    QByteArray TrackName = tracks.join('|').toUtf8();
+    m_trackList = TrackName;
+    emit updatedTracksList(m_trackList.data());
   }
 
   return sd;
