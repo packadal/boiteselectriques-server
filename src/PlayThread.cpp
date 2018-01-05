@@ -131,14 +131,14 @@ void PlayThread::setThreshold(const unsigned int threshold) {
 
 void PlayThread::resetThreshold() {
   m_options->beginGroup("default");
-  setThreshold(m_options->value("threshold").toInt());
+  setThreshold(m_options->value("threshold").toUInt());
   m_options->endGroup();
 }
 
 void PlayThread::load(const SongData& s) {
   // Reset to 0
   m_bufferCount = 0;
-  int track_count = s.tracks.size();
+  size_t track_count = s.tracks.size();
   for (auto& track : m_tracks)
     delete track;
   m_tracks.clear();
@@ -149,7 +149,7 @@ void PlayThread::load(const SongData& s) {
   std::vector<Input_p> chains(track_count);
 
 #pragma omp parallel for
-  for (int i = 0; i < track_count; i++) {
+  for (size_t i = 0; i < track_count; i++) {
     auto* t = new Track(s.tracks[i], m_conf, m_options, i);
     connect(t, &Track::onActivationSwitch, this,
             &PlayThread::onEnablementChanged);
