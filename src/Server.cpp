@@ -243,10 +243,6 @@ void Server::sendPlay() {
   sendMsgPlay(getTempo());
 }
 
-void Server::sendTracksCount() {
-  sendMsgTracksCount(m_player->getTracksCount());
-}
-
 void Server::sendTracksList() {
   sendMsgTracksList(m_saveManager.trackList());
 }
@@ -425,7 +421,6 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
 
   sendSongTitle();
   sendTracksList();
-  sendTracksCount();
   sendActivatedTracks();
   sendMasterVolume();
 
@@ -534,11 +529,6 @@ void Server::sendMsgSongsList(const char* list) {
   qDebug() << "sent /box/songs_list" << list;
 }
 
-void Server::sendMsgTracksCount(int num) {
-  m_sender->send(osc::MessageGenerator()("/box/tracks_count", num));
-  qDebug() << "sent /box/tracks_count" << num;
-}
-
 void Server::sendMsgTracksList(const char* list) {
   m_sender->send(osc::MessageGenerator()("/box/tracks_list", list));
   qDebug() << "sent /box/tracks_list" << list;
@@ -578,8 +568,6 @@ int Server::load() {
 
         m_loaded = true;
         sendSongTitle();
-
-        sendTracksCount();
 
         ledOff(m_options->value("gpio/warning").toInt());
         return 0;

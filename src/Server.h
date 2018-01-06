@@ -102,11 +102,6 @@ class Server : public QObject {
    */
   void sendMsgSongsList(const char* list);
   /**
-   * @brief Send the song's number of tracks
-   * @param num Count of tracks
-   */
-  void sendMsgTracksCount(int num);
-  /**
    * @brief Send the song's track list
    * @param list Tracks list
    */
@@ -373,10 +368,6 @@ class Server : public QObject {
    * @brief Send the available songs' list
    */
   void sendSongsList();
-  /**
-   * @brief Send the song's number of tracks
-   */
-  void sendTracksCount();
   /**
    * @brief Send the song's tracks names, in the form of a string where the
    * different track names are separated by the '|' character
