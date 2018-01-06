@@ -233,6 +233,12 @@ void Server::sendActivatedTracks() {
   sendMsgActivatedTracks(m_player->getActivatedTracks());
 }
 
+void Server::sendMasterVolume() {
+  m_sender->send(osc::MessageGenerator()(
+      "/box/master", m_options->value("default/master").toInt()));
+  qDebug() << "sent /box/master" << m_options->value("default/master").toInt();
+}
+
 void Server::sendPlay() {
   sendMsgPlay(getTempo());
 }
@@ -348,6 +354,8 @@ void Server::handle__box_master(osc::ReceivedMessageArgumentStream args) {
   qDebug() << "received /box/master" << vol;
 
   ledBlink();
+  m_options->setValue("default/master", vol);
+
   m_player->setMasterVolume(vol);
 }
 
@@ -419,6 +427,7 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
   sendTracksList();
   sendTracksCount();
   sendActivatedTracks();
+  sendMasterVolume();
 
   sendReady(m_player->getTracksCount() > 0);
 }

@@ -398,6 +398,10 @@ class Server : public QObject {
    */
   void sendActivatedTracks();
   /**
+   * @brief Send the master volume
+   */
+  void sendMasterVolume();
+  /**
    * @brief Notify the client of the song's playing start
    */
   void sendPlay();
