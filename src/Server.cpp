@@ -86,8 +86,6 @@ Server::Server(QSettings* opt) : m_options(opt) {
 
   m_options->endGroup();
 
-  connect(m_player, &PlayThread::muteChanged, m_player, &PlayThread::setMute);
-
   connect(this, &Server::updateThreshold, m_player, &PlayThread::setThreshold);
   connect(this, &Server::resetThreshold, m_player, &PlayThread::resetThreshold);
 
@@ -243,6 +241,16 @@ void Server::sendPlay() {
   sendMsgPlay(getTempo());
 }
 
+void Server::sendMute() {
+  int muteStatus = 0;
+  for (unsigned char i = 0; i < 8; ++i) {
+    muteStatus += (m_player->isValidTrack(i) && m_player->track(i)->isMuted())
+                      ? (1 << i)
+                      : 0;
+  }
+  m_sender->send(osc::MessageGenerator()("/box/mute", muteStatus));
+}
+
 void Server::sendTracksList() {
   sendMsgTracksList(m_saveManager.trackList());
 }
@@ -298,10 +306,13 @@ void Server::handle__box_resetThreshold(
 void Server::handle__box_enable(osc::ReceivedMessageArgumentStream args) {
   osc::int32 box;
   args >> box;
+  bool activated;
+  args >> activated;
   qDebug() << "received /box/enable" << box;
 
   ledBlink();
-  switchBox(box, m_player->getThreshold());
+  m_player->setTrackActivated(box, activated);
+  sendActivatedTracks();
 }
 
 void Server::handle__box_volume(osc::ReceivedMessageArgumentStream args) {
@@ -312,6 +323,9 @@ void Server::handle__box_volume(osc::ReceivedMessageArgumentStream args) {
 
   ledBlink();
   m_player->setVolume(box, vol);
+
+  m_sender->send(
+      osc::MessageGenerator()("/box/volume", box, m_player->volume(box)));
 }
 
 void Server::handle__box_pan(osc::ReceivedMessageArgumentStream args) {
@@ -322,6 +336,9 @@ void Server::handle__box_pan(osc::ReceivedMessageArgumentStream args) {
 
   ledBlink();
   m_player->setPan(box, vol);
+
+  m_sender->send(
+      osc::MessageGenerator()("/box/pan", box, m_player->track(box)->getPan()));
 }
 
 void Server::handle__box_mute(osc::ReceivedMessageArgumentStream args) {
@@ -332,6 +349,8 @@ void Server::handle__box_mute(osc::ReceivedMessageArgumentStream args) {
 
   ledBlink();
   m_player->setMute(box, state);
+
+  sendMute();
 }
 
 void Server::handle__box_solo(osc::ReceivedMessageArgumentStream args) {
@@ -342,6 +361,10 @@ void Server::handle__box_solo(osc::ReceivedMessageArgumentStream args) {
 
   ledBlink();
   m_player->solo(box, state);
+  m_sender->send(osc::MessageGenerator()("/box/solo", box, state));
+
+  sendMute();
+  sendActivatedTracks();
 }
 
 void Server::handle__box_master(osc::ReceivedMessageArgumentStream args) {
@@ -384,6 +407,8 @@ void Server::handle__box_reset(osc::ReceivedMessageArgumentStream args) {
     stop();
 
   m_player->reset();
+
+  sendActivatedTracks();
 }
 
 void Server::handle__box_refreshSong(osc::ReceivedMessageArgumentStream args) {
@@ -423,6 +448,9 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
   sendTracksList();
   sendActivatedTracks();
   sendMasterVolume();
+  sendMute();
+  m_sender->send(
+      osc::MessageGenerator()("/box/playing", !m_player->isStopped()));
 
   sendReady(m_player->getTracksCount() > 0);
 }

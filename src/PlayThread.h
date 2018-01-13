@@ -78,12 +78,6 @@ class PlayThread : public QThread {
    */
   void beatCountChanged(double time);
   /**
-   * @brief Notify of the mute value modification
-   * @param box Related track number
-   * @param state New state
-   */
-  void muteChanged(int box, bool state);
-  /**
    * @brief Notify of the song loading end
    * @param on Next track number
    * @param max Max track number
@@ -113,11 +107,25 @@ class PlayThread : public QThread {
    */
   void setVolume(const unsigned int track, const unsigned int vol);
   /**
+   * @brief volume getter.
+   * @param track for which to return the volume.
+   * @return the volume if the track is valid, or a default value of 50
+   * otherwise.
+   */
+  int volume(unsigned int track) const;
+  /**
    * @brief Track pan setter
    * @param track Related track number
    * @param pan New pan value (between -100 and 100)
    */
   void setPan(const unsigned int track, const int pan);
+  /**
+   * @brief pan setter
+   * @param track for which to return the pan.
+   * @return the pan (between -100 and 100) if the track is valid, or a default
+   * value of 0 otherwise.
+   */
+  int pan(const unsigned int track) const;
   /**
    * @brief (Un)Mute a track
    * @param track Related track number
@@ -127,10 +135,21 @@ class PlayThread : public QThread {
    */
   void setMute(const unsigned int track, const bool doMute);
 
+  Track* track(int track) const;
+
   /**
    * @brief Change the solo state of a track
    * @param track Related track number
    * @param state New solo state
+   *
+   * If state is true, this sets track 'track' to be the only playing one by
+   * * activating it
+   * * muting all other tracks
+   * * disabling solo on all other tracks
+   *
+   * If state is false, this
+   * * removes the solo on all tracks
+   * * removes the muting on all tracks
    */
   void solo(const unsigned int track, const bool state);
 
@@ -140,17 +159,17 @@ class PlayThread : public QThread {
   void reset();
 
   /**
-   * @brief Called when the activated status of a track is changed
-   * @param enabled New activation status
-   * @param track Related track number
-   */
-  void onEnablementChanged(bool enabled, int track);
-
-  /**
    * @brief Switch a box activation status
    * @param track Related track number
    */
   void switchBox(const unsigned int track);
+
+  /**
+   * @brief setTrackActivated enables or disables a track
+   * @param track the track to enabled/disable
+   * @param activated wether to enable or disable the track
+   */
+  void setTrackActivated(unsigned int track, bool activated);
 
   /**
    * @brief Threshold setter
@@ -174,6 +193,13 @@ class PlayThread : public QThread {
    */
   void load(const SongData& s);
 
+  /**
+   * @brief Check if a given track exists
+   * @param track Track number
+   * @return true if the track exists, false else
+   */
+  bool isValidTrack(unsigned int track) const;
+
  private:
   QSettings* m_options;
   Parameters<double> m_conf; /*< Configuration data */
@@ -187,13 +213,6 @@ class PlayThread : public QThread {
 
   bool m_isPlaying{false};
   int m_threshold;
-
-  /**
-   * @brief Check if a given track exists
-   * @param track Track number
-   * @return true if the track exists, false else
-   */
-  bool isValidTrack(unsigned int track);
 };
 
 #endif  // PLAYTHREAD_H

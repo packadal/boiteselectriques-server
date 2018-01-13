@@ -396,6 +396,8 @@ class Server : public QObject {
    * @brief Notify the client of the song's playing start
    */
   void sendPlay();
+
+  void sendMute();
 };
 
 #endif  // SERVER_H

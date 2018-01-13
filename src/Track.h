@@ -31,8 +31,8 @@ class Track : public QObject {
   std::string m_file; /*< Filepath */
 
   std::string m_name;
-  bool m_soloState;
-  bool m_activatedState;
+  bool m_soloState = false;
+  bool m_activatedState = false;
 
   QSettings* m_options;
 
@@ -44,6 +44,13 @@ class Track : public QObject {
 
   double m_volume; /*< "Raw" volume */
   double m_pan;    /*< "Raw" pan */
+  bool m_mute = false;
+
+  /**
+   * @brief updateAudible this controls if a track can be heard, depending on
+   * wether it's muted and enabled
+   */
+  void updateAudible();
 
  public:
   Track();
@@ -62,12 +69,13 @@ class Track : public QObject {
   double getPan() const;
   bool isActivated() const;
   bool isSolo() const;
+  bool isMuted() const { return m_mute; }
 
   std::shared_ptr<Amplify<double>> getVolumePtr() const;
   std::shared_ptr<Pan<double>> getPanPtr() const;
   std::shared_ptr<Mute<double>> getMutePtr() const;
 
-  void setMute(const bool state);
+  void setMute(bool mute);
 
   /**
    * @brief Volume setter
@@ -97,25 +105,9 @@ class Track : public QObject {
   void setSolo(const bool state);
 
   /**
-   * @brief Signal the new track state (activated or not)
-   *
-   * If possible (i.e. the track is not in solo mode),
-   * signals the new track's activation status.
-   */
-  void notifyEnabled(bool);
-
-  /**
    * @brief Reset the track's settings to their default values
    */
   void reset();
-
- signals:
-  /**
-   * @brief Notify of the change of the track's activation status
-   * @param status New activation status
-   * @param id Related track number
-   */
-  void onActivationSwitch(bool status, int id);
 };
 
 #endif  // TRACK_H

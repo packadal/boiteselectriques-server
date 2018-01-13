@@ -5,31 +5,28 @@
  * @brief Tracks manipulation implementation
  */
 
-Track::Track()
-    : m_id(0),
-      m_file(""),
-      m_name(""),
-      m_soloState(false),
-      m_activatedState(false),
-      m_options(nullptr) {}
+void Track::updateAudible() {
+  const bool audible = !m_mute && m_activatedState;
+  if (audible)
+    m_muteState->unmute();
+  else
+    m_muteState->mute();
+}
+
+Track::Track() : m_id(0), m_file(""), m_name(""), m_options(nullptr) {}
 
 Track::Track(const TrackData& data,
              Parameters<double> conf,
              QSettings* opt,
              int id)
-    : m_id(id),
-      m_file(data.file),
-      m_name(data.name),
-      m_soloState(false),
-      m_activatedState(false),
-      m_options(opt) {
+    : m_id(id), m_file(data.file), m_name(data.name), m_options(opt) {
   m_volumePtr = std::make_shared<Amplify<double>>(conf);
   m_panPtr = std::make_shared<Pan<double>>(conf);
   m_muteState = std::make_shared<Mute<double>>(conf);
+  m_muteState->mute();
 
   setVolume(data.volume);
   setPan(data.pan);
-  setMute(true);
 }
 
 std::string Track::getName() const {
@@ -60,6 +57,11 @@ std::shared_ptr<Mute<double>> Track::getMutePtr() const {
   return m_muteState;
 }
 
+void Track::setMute(bool mute) {
+  m_mute = mute;
+  updateAudible();
+}
+
 bool Track::isActivated() const {
   return m_activatedState;
 }
@@ -78,22 +80,13 @@ void Track::setPan(const double pan) {
   m_panPtr->setPan(m_pan / 100.0);
 }
 
-void Track::setMute(const bool state) {
-  state ? m_muteState->mute() : m_muteState->unmute();
-}
-
 void Track::setActivated(const bool state) {
   m_activatedState = state;
-  notifyEnabled(state);
+  updateAudible();
 }
 
 void Track::setSolo(const bool state) {
   m_soloState = state;
-}
-
-void Track::notifyEnabled(bool enabled) {
-  if (!m_soloState)
-    emit onActivationSwitch(enabled, m_id);
 }
 
 void Track::reset() {

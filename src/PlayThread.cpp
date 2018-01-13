@@ -54,14 +54,26 @@ void PlayThread::setVolume(const unsigned int track, const unsigned int vol) {
     m_tracks[track]->setVolume(vol);
 }
 
+int PlayThread::volume(unsigned int track) const {
+  return isValidTrack(track) ? m_tracks[track]->getVolume() : 50;
+}
+
 void PlayThread::setPan(const unsigned int track, const int pan) {
   if (isValidTrack(track))
     m_tracks[track]->setPan(pan);
 }
 
+int PlayThread::pan(const unsigned int track) const {
+  return isValidTrack(track) ? m_tracks[track]->getPan() : 0;
+}
+
 void PlayThread::setMute(const unsigned int track, const bool doMute) {
   if (isValidTrack(track))
     m_tracks[track]->setMute(doMute);
+}
+
+Track* PlayThread::track(int track) const {
+  return isValidTrack(track) ? m_tracks[track] : nullptr;
 }
 
 void PlayThread::timeHandle() {
@@ -95,33 +107,31 @@ void PlayThread::reset() {
 }
 
 void PlayThread::solo(const unsigned int track, const bool state) {
-  if (isValidTrack(track)) {
-    m_tracks[track]->setSolo(state);
+  if (isValidTrack(track))
+    m_tracks[track]->setActivated(true);
 
-    if (state) {
-      m_tracks[track]->setMute(false);
+  for (unsigned char i = 0; i < m_tracks.size(); ++i) {
+    if (!isValidTrack(i))
+      continue;
 
-      for (auto& track : m_tracks)
-        if (!track->isSolo())
-          track->setMute(true);
-    } else {
-      bool noMoreSolo = true;
-      for (int i = 0; i < m_tracks.size() && noMoreSolo; i++)
-        if (m_tracks[i]->isSolo())
-          noMoreSolo = false;
-
-      if (noMoreSolo)
-        for (auto& track : m_tracks)
-          track->setMute(!track->isActivated());
-      else
-        m_tracks[track]->setMute(true);
-    }
+    Track* currentTrack = m_tracks[i];
+    // this will only be true for the track passed as parameter if 'state' is
+    // true, in all other cases this will be false.
+    const bool currentTrackIsTarget = state && (i != track);
+    currentTrack->setSolo(currentTrackIsTarget);
+    currentTrack->setMute(currentTrackIsTarget);
   }
 }
 
 void PlayThread::switchBox(const unsigned int track) {
   if (isValidTrack(track))
     m_tracks[track]->setActivated(!m_tracks[track]->isActivated());
+}
+
+void PlayThread::setTrackActivated(unsigned int track, bool activated) {
+  if (isValidTrack(track)) {
+    m_tracks[track]->setActivated(activated);
+  }
 }
 
 void PlayThread::setThreshold(const unsigned int threshold) {
@@ -151,8 +161,6 @@ void PlayThread::load(const SongData& s) {
 #pragma omp parallel for
   for (size_t i = 0; i < track_count; i++) {
     auto* t = new Track(s.tracks[i], m_conf, m_options, i);
-    connect(t, &Track::onActivationSwitch, this,
-            &PlayThread::onEnablementChanged);
     m_tracks[i] = t;
 
     auto file = new FFMPEGFileInput<double>(m_tracks[i]->getFile(), m_conf);
@@ -179,14 +187,10 @@ void PlayThread::load(const SongData& s) {
       std::bind(&PlayThread::timeHandle, this), m_conf);
 }
 
-bool PlayThread::isValidTrack(unsigned int track) {
-  bool isValid = track < getTracksCount();
+bool PlayThread::isValidTrack(unsigned int track) const {
+  const bool isValid = track < getTracksCount();
   if (!isValid)
     qCritical() << tr("ERROR : Inexistent track") << track;
 
   return isValid;
-}
-
-void PlayThread::onEnablementChanged(bool enabled, int track) {
-  emit muteChanged(track, !enabled);
 }
