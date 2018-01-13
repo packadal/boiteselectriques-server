@@ -373,7 +373,7 @@ void Server::handle__box_master(osc::ReceivedMessageArgumentStream args) {
   qDebug() << "received /box/master" << vol;
 
   ledBlink();
-  m_options->setValue("default/master", vol);
+  m_options->setValue("default/master", QVariant::fromValue<int>(vol));
 
   m_player->setMasterVolume(vol);
 }
