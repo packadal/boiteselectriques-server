@@ -491,15 +491,12 @@ void Server::stop() {
 void Server::updateBeat(double t) {  // in seconds
 
   int time = (int)(t * getTempo() / 60.0f) + 1;
+  time = time % 33;
 
   if (time != m_previousBeat && time <= m_beatCount && !m_player->isStopped()) {
     m_previousBeat = time;
 
     sendBeatCount(time);
-    if (time % 8 == 0) {  // sync
-      sendActivatedTracks();
-      sendBeatCount(time);
-    }
   } else if (m_player->isStopped()) {
     m_previousBeat = 0;
     sendBeatCount(0);
