@@ -74,7 +74,9 @@ Server::Server(QSettings* opt) : m_options(opt) {
   initConf(m_options);
   qDebug() << m_options->fileName();
 
+#ifdef __arm__
   ledSetup();
+#endif
   ledOn();
 
   m_player = new PlayThread(m_options);
@@ -100,8 +102,10 @@ Server::Server(QSettings* opt) : m_options(opt) {
   connect(&m_serialManager, &SerialManager::boxActivated, this,
           &Server::switchBox);
 
+// this allows to build and run on a PC for easier development
+#ifdef __arm__
   m_serialManager.start();
-
+#endif
   // Client events
   m_receiver->addHandler("/box/update_threshold",
                          std::bind(&Server::handle__box_updateThreshold, this,
