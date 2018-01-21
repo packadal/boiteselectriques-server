@@ -13,13 +13,10 @@ void Track::updateAudible() {
     m_muteState->mute();
 }
 
-Track::Track() : m_id(0), m_file(""), m_name(""), m_options(nullptr) {}
+Track::Track() : m_file(""), m_name(""), m_options(nullptr) {}
 
-Track::Track(const TrackData& data,
-             Parameters<double> conf,
-             QSettings* opt,
-             int id)
-    : m_id(id), m_file(data.file), m_name(data.name), m_options(opt) {
+Track::Track(const TrackData& data, Parameters<double> conf, QSettings* opt)
+    : m_file(data.file), m_name(data.name), m_options(opt) {
   m_volumePtr = std::make_shared<Amplify<double>>(conf);
   m_panPtr = std::make_shared<Pan<double>>(conf);
   m_muteState = std::make_shared<Mute<double>>(conf);
@@ -95,6 +92,7 @@ void Track::reset() {
   setVolume(m_options->value("volume").toInt());
   setPan(m_options->value("pan").toInt());
   setActivated(m_options->value("activation").toBool());
+  setMute(false);
 
   m_options->endGroup();
 }

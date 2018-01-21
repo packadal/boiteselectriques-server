@@ -30,7 +30,6 @@ struct Settings {
  */
 class Server : public QObject {
   Q_OBJECT
-  Q_PROPERTY(int tempo READ getTempo WRITE setTempo)
 
   friend class SaveManager;
 
@@ -62,55 +61,6 @@ class Server : public QObject {
    * @brief Setup WiringPi interface
    */
   void ledSetup();
-
-  /***************************
-   * TRANSMISSIONS TO CLIENT *
-   ***************************/
-
-  // Only send the corresponding data using OSC protocol
-
-  /**
-   * @brief Send the actual threshold value to the client
-   * @param t Threshold value
-   */
-  void sendMsgThreshold(int t);
-  /**
-   * @brief Send the activated tracks' numbers to the client
-   * @param tracks Tracks numbers
-   *
-   * Called every 8 beats, to keep the client synchronized
-   */
-  void sendMsgActivatedTracks(int tracks);
-  /**
-   * @brief Send the actual beat count
-   * @param beat Beat count
-   */
-  void sendMsgBeatCount(int beat);
-  /**
-   * @brief Notify the client of the song's playing start
-   * @param tempo Actual song's tempo
-   */
-  void sendMsgPlay(int tempo);
-  /**
-   * @brief Send the actual song's title
-   * @param title Song's title
-   */
-  void sendMsgSongTitle(const char* title);
-  /**
-   * @brief Send the available songs' list
-   * @param list Songs' titles list
-   */
-  void sendMsgSongsList(const char* list);
-  /**
-   * @brief Send the song's track list
-   * @param list Tracks list
-   */
-  void sendMsgTracksList(const char* list);
-  /**
-   * @brief Notify the client of the loading state
-   * @param isReady Server's loading state
-   */
-  void sendMsgReady(bool isReady);
 
   /*******************
    * EVENTS HANDLING *
@@ -232,16 +182,10 @@ class Server : public QObject {
   ~Server();
 
   /**
-   * @brief Tempo getter
-   * @return Tempo value
-   */
-  int getTempo() const;
-
-  /**
    * @brief Calculate the threshold value
    * @return Threshold value to transmit
    */
-  unsigned int getThreshold() const;
+  int getThreshold() const;
 
   /**
    * @brief Load or initialize the configuration options
@@ -309,11 +253,6 @@ class Server : public QObject {
   int load();
 
   /**
-   * @brief Save the modifications
-   */
-  void save();
-
-  /**
    * @brief Stop the song
    */
   void stop();
@@ -337,29 +276,20 @@ class Server : public QObject {
    */
   void onSongLoaded(unsigned int on, unsigned int max);
 
-  /**
-   * @brief Update the client's track list
-   * @param list Track list
-   */
-  void updateTrackList(const char* list);
-
-  /**
-   * @brief Tempo setter
-   * @param arg New tempo value
-   */
-  void setTempo(unsigned int arg);
-
   /***************************
    * TRANSMISSIONS TO CLIENT *
    ***************************/
 
   // Perform eventual calculations and then call the private sending functions
 
+  void sendTrackVolume(int track, int volume);
+  void sendTrackPan(int track, int pan);
+
   /**
    * @brief Send the actual beat count
    * @param beat Beat count
    */
-  void sendBeatCount(unsigned int beat);
+  void sendBeatCount(int beat);
   /**
    * @brief Send the actual song's title
    */

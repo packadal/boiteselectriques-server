@@ -25,9 +25,6 @@
 class Track : public QObject {
   Q_OBJECT
  private:
-  unsigned int
-      m_id; /*< Track number (default : its position in the PlayThread Tracks
-             vector) */
   std::string m_file; /*< Filepath */
 
   std::string m_name;
@@ -58,10 +55,8 @@ class Track : public QObject {
    * @brief Track constructor
    * @param data Track informations
    * @param conf Default configuration data (volume, pan, mute)
-   * @param id Track number (should be its position in the PlayThread's tracks
-   * vector)
    */
-  Track(const TrackData& data, Parameters<double> conf, QSettings* opt, int id);
+  Track(const TrackData& data, Parameters<double> conf, QSettings* opt);
 
   std::string getName() const;
   std::string getFile() const;

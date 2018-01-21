@@ -13,22 +13,23 @@
 #include <QDebug>
 
 PlayThread::PlayThread(QSettings* c) : QThread(nullptr), m_options(c) {
-  m_options->beginGroup("default");
-  setThreshold(m_options->value("threshold").toInt());
-  m_options->endGroup();
+  setThreshold(m_options->value("default/threshold").toUInt());
+
+  // make sure the master volume is properly initialized
+  setMasterVolume(m_options->value("default/master").toUInt());
 }
 
-unsigned int PlayThread::getTracksCount() const {
+size_t PlayThread::getTracksCount() const {
   return m_tracks.size();
 }
 
-Track* PlayThread::getTrack(const unsigned int track) {
-  return (isValidTrack(track) ? m_tracks[track] : NULL);
+Track* PlayThread::getTrack(const size_t track) {
+  return (isValidTrack(track) ? m_tracks[track] : nullptr);
 }
 
 int PlayThread::getActivatedTracks() const {
   int res = 0;
-  for (int i = 0; i < m_tracks.size(); i++)
+  for (size_t i = 0; i < m_tracks.size(); i++)
     res += (m_tracks[i]->isActivated() ? pow(2, i) : 0);
 
   return res;
@@ -49,7 +50,7 @@ void PlayThread::setMasterVolume(const unsigned int vol) {
   m_masterVolume->setGain(vol / 10.0);
 }
 
-void PlayThread::setVolume(const unsigned int track, const unsigned int vol) {
+void PlayThread::setVolume(const size_t track, const unsigned int vol) {
   if (isValidTrack(track))
     m_tracks[track]->setVolume(vol);
 }
@@ -58,21 +59,21 @@ int PlayThread::volume(unsigned int track) const {
   return isValidTrack(track) ? m_tracks[track]->getVolume() : 50;
 }
 
-void PlayThread::setPan(const unsigned int track, const int pan) {
+void PlayThread::setPan(const size_t track, const int pan) {
   if (isValidTrack(track))
     m_tracks[track]->setPan(pan);
 }
 
-int PlayThread::pan(const unsigned int track) const {
+int PlayThread::pan(const size_t track) const {
   return isValidTrack(track) ? m_tracks[track]->getPan() : 0;
 }
 
-void PlayThread::setMute(const unsigned int track, const bool doMute) {
+void PlayThread::setMute(const size_t track, const bool doMute) {
   if (isValidTrack(track))
     m_tracks[track]->setMute(doMute);
 }
 
-Track* PlayThread::track(int track) const {
+Track* PlayThread::track(const size_t track) const {
   return isValidTrack(track) ? m_tracks[track] : nullptr;
 }
 
@@ -98,15 +99,13 @@ bool PlayThread::isStopped() const {
 }
 
 void PlayThread::reset() {
-  m_options->beginGroup("default");
-  setMasterVolume(m_options->value("master").toInt());
-  m_options->endGroup();
+  setMasterVolume(m_options->value("default/master").toInt());
 
   for (auto& track : m_tracks)
     track->reset();
 }
 
-void PlayThread::solo(const unsigned int track, const bool state) {
+void PlayThread::solo(const size_t track, const bool state) {
   if (isValidTrack(track))
     m_tracks[track]->setActivated(true);
 
@@ -123,7 +122,7 @@ void PlayThread::solo(const unsigned int track, const bool state) {
   }
 }
 
-void PlayThread::switchBox(const unsigned int track) {
+void PlayThread::switchBox(const size_t track) {
   if (isValidTrack(track))
     m_tracks[track]->setActivated(!m_tracks[track]->isActivated());
 }
@@ -140,15 +139,13 @@ void PlayThread::setThreshold(const unsigned int threshold) {
 }
 
 void PlayThread::resetThreshold() {
-  m_options->beginGroup("default");
-  setThreshold(m_options->value("threshold").toUInt());
-  m_options->endGroup();
+  setThreshold(m_options->value("default/threshold").toUInt());
 }
 
 void PlayThread::load(const SongData& s) {
   // Reset to 0
   m_bufferCount = 0;
-  size_t track_count = s.tracks.size();
+  const size_t track_count = s.tracks.size();
   for (auto& track : m_tracks)
     delete track;
   m_tracks.clear();
@@ -160,7 +157,7 @@ void PlayThread::load(const SongData& s) {
 
 #pragma omp parallel for
   for (size_t i = 0; i < track_count; i++) {
-    auto* t = new Track(s.tracks[i], m_conf, m_options, i);
+    auto* t = new Track(s.tracks[i], m_conf, m_options);
     m_tracks[i] = t;
 
     auto file = new FFMPEGFileInput<double>(m_tracks[i]->getFile(), m_conf);
@@ -187,7 +184,7 @@ void PlayThread::load(const SongData& s) {
       std::bind(&PlayThread::timeHandle, this), m_conf);
 }
 
-bool PlayThread::isValidTrack(unsigned int track) const {
+bool PlayThread::isValidTrack(size_t track) const {
   const bool isValid = track < getTracksCount();
   if (!isValid)
     qCritical() << tr("ERROR : Inexistent track") << track;

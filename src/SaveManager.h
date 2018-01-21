@@ -27,46 +27,16 @@ class Server;
  *
  */
 class SaveManager : public QObject {
-  Q_OBJECT
-
  public:
-  /**
-   * @brief SaveManager constructor
-   * @param parent Parent object (facultative)
-   */
-  explicit SaveManager(QObject* parent = 0);
-
-  std::shared_ptr<QTemporaryDir>
-      tempdir{}; /*< Temp. directory where .song files' data are extracted */
-
   /**
    * @brief Load a file
    * @param name Filename
    * @return Corresponding song data
    */
-  SongData load(const QString& name);
-
-  /**
-   * @brief Save the parameters (volume, pan, ...)
-   * @param name Filename
-   * @param manager Audio server manager (pointer)
-   */
-  void save(const QString& name, Server* manager);
-
-  /**
-   * @return the track list as a '|' concatenated string
-   */
-  const char* trackList() const { return m_trackList.data(); }
-
- signals:
-  /**
-   * @brief Notify of a new tracks list
-   * @param list Tracks list
-   */
-  void updatedTracksList(const char* list);
+  static SongData load(const QString& name);
 
  private:
-  QByteArray m_trackList = {};
+  static std::unique_ptr<QTemporaryDir> tempdir;
 };
 
 #endif  // SAVEMANAGER_H
