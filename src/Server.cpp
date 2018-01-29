@@ -176,7 +176,7 @@ Server::~Server() {
 }
 
 int Server::getThreshold() const {
-  return 99 - (m_player->getThreshold() - 100) / 4;
+  return m_player->getThreshold();
 }
 
 bool Server::initConf(QSettings* c) {
@@ -300,6 +300,7 @@ void Server::handle__box_updateThreshold(
 
   ledBlink();
   emit updateThreshold(senseUpdated);
+  sendThreshold();
 }
 
 void Server::handle__box_resetThreshold(

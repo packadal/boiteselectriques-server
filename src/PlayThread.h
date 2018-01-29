@@ -175,7 +175,7 @@ class PlayThread : public QThread {
    * @brief Threshold setter
    * @param "New" (not raw) threshold value (0-100)
    */
-  void setThreshold(const unsigned int threshold);
+  void setThreshold(int threshold);
 
   /**
    * @brief Reset threshold to its default value
@@ -212,7 +212,7 @@ class PlayThread : public QThread {
   int m_maxBufferCount{}; /*< Total buffer count in a loop */
 
   bool m_isPlaying{false};
-  unsigned int m_threshold;
+  int m_threshold;
 };
 
 #endif  // PLAYTHREAD_H

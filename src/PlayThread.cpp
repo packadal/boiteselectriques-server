@@ -17,7 +17,7 @@
 #include <QDebug>
 
 PlayThread::PlayThread(QSettings* c) : QThread(nullptr), m_options(c) {
-  setThreshold(m_options->value("default/threshold").toUInt());
+  resetThreshold();
 
   // make sure the master volume is properly initialized
   setMasterVolume(m_options->value("default/master").toUInt());
@@ -137,13 +137,13 @@ void PlayThread::setTrackActivated(unsigned int track, bool activated) {
   }
 }
 
-void PlayThread::setThreshold(const unsigned int threshold) {
-  m_threshold = (99 - threshold) * 4 + 100;
+void PlayThread::setThreshold(int threshold) {
+  m_threshold = threshold;
   m_options->setValue("default/threshold", m_threshold);
 }
 
 void PlayThread::resetThreshold() {
-  setThreshold(m_options->value("default/threshold").toUInt());
+  setThreshold(m_options->value("default/threshold").toInt());
 }
 
 void PlayThread::load(const SongData& s) {
