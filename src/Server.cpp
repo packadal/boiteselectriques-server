@@ -243,7 +243,7 @@ void Server::sendPlay() {
 
 void Server::sendMute() {
   int muteStatus = 0;
-  for (unsigned char i = 0; i < 8; ++i) {
+  for (unsigned char i = 0; i < m_player->getTracksCount(); ++i) {
     muteStatus += (m_player->isValidTrack(i) && m_player->track(i)->isMuted())
                       ? (1 << i)
                       : 0;
@@ -253,7 +253,7 @@ void Server::sendMute() {
 
 void Server::sendTracksList() {
   QStringList tracks;
-  for (unsigned char i = 0; i < 8; ++i) {
+  for (unsigned char i = 0; i < m_player->getTracksCount(); ++i) {
     if (m_player->isValidTrack(i)) {
       tracks << QString::fromStdString(m_player->track(i)->getName());
     }
@@ -443,7 +443,7 @@ void Server::handle__box_selectSong(osc::ReceivedMessageArgumentStream args) {
   load();
 
   sendTracksList();
-  for (unsigned char i = 0; i < 8; ++i) {
+  for (unsigned char i = 0; i < m_player->getTracksCount(); ++i) {
     sendTrackVolume(i, m_player->volume(i));
     sendTrackPan(i, m_player->pan(i));
   }
@@ -465,7 +465,7 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
   sendMasterVolume();
   sendMute();
 
-  for (unsigned char i = 0; i < 8; ++i) {
+  for (unsigned char i = 0; i < m_player->getTracksCount(); ++i) {
     sendTrackVolume(i, m_player->volume(i));
     sendTrackPan(i, m_player->pan(i));
   }
