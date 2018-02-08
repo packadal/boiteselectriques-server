@@ -268,7 +268,11 @@ void Server::sendTracksList() {
   qDebug() << "sent /box/tracks_list" << trackListChar;
 }
 
-void Server::sendBeatCount(int beat) {
+void Server::sendBeatCount() {
+  m_sender->send(osc::MessageGenerator()("/box/beat_count", m_beatCount));
+}
+
+void Server::sendBeat(int beat) {
   m_sender->send(osc::MessageGenerator()("/box/beat", beat));
   qDebug() << "sent /box/beat" << beat;
 }
@@ -279,8 +283,7 @@ void Server::sendSongsList() {
   exportFolder.setNameFilters(
       QStringList() << m_options->value("files/extension").toString());
   QStringList fileList = exportFolder.entryList();
-  QString str = fileList.join("|");
-  QByteArray list = str.toUtf8();
+  QByteArray list = fileList.join("|").toUtf8();
   const char* c_list = list.data();
 
   m_sender->send(osc::MessageGenerator()("/box/songs_list", c_list));
@@ -288,8 +291,7 @@ void Server::sendSongsList() {
 }
 
 void Server::sendSongTitle() {
-  QString raw_title = QString::fromStdString(m_song.name);
-  QByteArray title = raw_title.toLatin1();
+  QByteArray title = m_song.name.toUtf8();
   const char* c_title = title.data();
 
   m_sender->send(osc::MessageGenerator()("/box/title", c_title));
@@ -440,7 +442,7 @@ void Server::handle__box_selectSong(osc::ReceivedMessageArgumentStream args) {
 
   ledBlink();
 
-  QString so = QString(QLatin1String(receptSong));
+  QString so = QString(receptSong);
   if (!so.isEmpty())
     m_selSong = so;
 

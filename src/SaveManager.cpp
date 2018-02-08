@@ -40,16 +40,15 @@ SongData SaveManager::load(const QString& loadpath) {
 
   int count = settings.value("General/trackCount").toInt();
   sd.tempo = settings.value("General/tempo").toInt();
-  sd.name = settings.value("General/songName").toString().toStdString();
+  sd.name = settings.value("General/songName").toString();
   sd.sigNumerator = settings.value("General/sigNumerator").toInt();
   sd.sigDenominator = settings.value("General/sigDenominator").toInt();
 
   for (int i = 0; i < count; ++i) {
     sd.tracks.emplace_back(
-        settings.value(QString("Track%1/name").arg(i)).toString().toStdString(),
+        settings.value(QString("Track%1/name").arg(i)).toString(),
         (tempdir->path() + "/" +
-         settings.value(QString("Track%1/filename").arg(i)).toString())
-            .toStdString(),
+         settings.value(QString("Track%1/filename").arg(i)).toString()),
         settings.value(QString("Track%1/volume").arg(i)).toInt(),
         settings.value(QString("Track%1/pan").arg(i)).toInt());
   }
