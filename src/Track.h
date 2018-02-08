@@ -25,9 +25,9 @@
 class Track : public QObject {
   Q_OBJECT
  private:
-  std::string m_file; /*< Filepath */
+  QString m_file; /*< Filepath */
 
-  std::string m_name;
+  QString m_name;
   bool m_soloState = false;
   bool m_activatedState = false;
 
@@ -58,8 +58,8 @@ class Track : public QObject {
    */
   Track(const TrackData& data, Parameters<double> conf, QSettings* opt);
 
-  std::string getName() const;
-  std::string getFile() const;
+  QString getName() const;
+  QString getFile() const;
   double getVolume() const;
   double getPan() const;
   bool isActivated() const;

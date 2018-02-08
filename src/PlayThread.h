@@ -31,7 +31,7 @@ class StreamingManager;
  *
  * Liaison with the audio engine
  */
-class PlayThread : public QThread {
+class PlayThread : public QObject {
   Q_OBJECT
  public:
   explicit PlayThread(QSettings*);
@@ -41,12 +41,7 @@ class PlayThread : public QThread {
    * @return Tracks count of the current song
    */
   size_t getTracksCount() const;
-  /**
-   * @brief Access a track from its number
-   * @param track Track number
-   * @return Pointer to the asked Track
-   */
-  Track* getTrack(const size_t track);
+
   /**
    * @brief Give the number tracks currently active
    * @return Count of activated tracks
@@ -60,11 +55,14 @@ class PlayThread : public QThread {
 
   /**
    * @brief Give the playing status
-   * @return true if the playing is stopped, false else
+   * @return true if playing, false otherwise
    */
-  bool isStopped() const;
+  bool isPlaying() const;
 
  signals:
+
+  void playChanged();
+
   /**
    * @brief Notify of the modification of the actual beat value
    * @param time Actual time (seconds)
@@ -85,10 +83,6 @@ class PlayThread : public QThread {
   void songLoaded(int, int);
 
  public slots:
-  /**
-   * @brief Play the song
-   */
-  void run();
 
   /**
    * @brief Stop the playing
@@ -135,6 +129,11 @@ class PlayThread : public QThread {
    */
   void setMute(const size_t track, const bool doMute);
 
+  /**
+   * @brief Access a track from its number
+   * @param track Track number
+   * @return Pointer to the asked Track
+   */
   Track* track(const size_t track) const;
 
   /**
@@ -186,6 +185,11 @@ class PlayThread : public QThread {
    * @brief Regularly called to update the beat value
    */
   void timeHandle();
+
+  /**
+   * @brief Play the song
+   */
+  void playSong();
 
   /**
    * @brief Load a song in the engine

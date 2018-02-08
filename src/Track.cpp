@@ -26,11 +26,11 @@ Track::Track(const TrackData& data, Parameters<double> conf, QSettings* opt)
   setPan(data.pan);
 }
 
-std::string Track::getName() const {
+QString Track::getName() const {
   return m_name;
 }
 
-std::string Track::getFile() const {
+QString Track::getFile() const {
   return m_file;
 }
 

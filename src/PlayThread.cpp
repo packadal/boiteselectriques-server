@@ -16,7 +16,7 @@
 #include <stream_io/RtAudioOutput.h>
 #include <QDebug>
 
-PlayThread::PlayThread(QSettings* c) : QThread(nullptr), m_options(c) {
+PlayThread::PlayThread(QSettings* c) : m_options(c) {
   resetThreshold();
 
   // make sure the master volume is properly initialized
@@ -25,10 +25,6 @@ PlayThread::PlayThread(QSettings* c) : QThread(nullptr), m_options(c) {
 
 size_t PlayThread::getTracksCount() const {
   return m_tracks.size();
-}
-
-Track* PlayThread::getTrack(const size_t track) {
-  return (isValidTrack(track) ? m_tracks[track] : nullptr);
 }
 
 int PlayThread::getActivatedTracks() const {
@@ -41,13 +37,6 @@ int PlayThread::getActivatedTracks() const {
 
 int PlayThread::getThreshold() const {
   return m_threshold;
-}
-
-void PlayThread::run() {
-  m_manager->input()->reset();
-  m_bufferCount = 0;
-  m_isPlaying = true;
-  m_manager->execute();
 }
 
 void PlayThread::setMasterVolume(const unsigned int vol) {
@@ -90,16 +79,27 @@ void PlayThread::timeHandle() {
 }
 
 void PlayThread::stop() {
-  if (this->isRunning()) {
-    m_manager->stop();
-    m_manager->input()->reset();
-    m_bufferCount = 0;
-    m_isPlaying = false;
-  }
+  m_manager->stop();
+  m_bufferCount = 0;
+  m_isPlaying = false;
+
+  emit playChanged();
 }
 
-bool PlayThread::isStopped() const {
-  return !m_isPlaying;
+void PlayThread::playSong() {
+  m_manager->input()->reset();
+  m_bufferCount = 0;
+  m_isPlaying = true;
+
+  // emit before starting the execution as it prevents anything else from
+  // running on this thread
+  emit playChanged();
+
+  m_manager->execute();
+}
+
+bool PlayThread::isPlaying() const {
+  return m_isPlaying;
 }
 
 void PlayThread::reset() {
@@ -107,6 +107,10 @@ void PlayThread::reset() {
 
   for (auto& track : m_tracks)
     track->reset();
+
+  m_manager->input()->reset();
+  m_bufferCount = 0;
+  m_isPlaying = false;
 }
 
 void PlayThread::solo(const size_t track, const bool state) {
@@ -164,7 +168,8 @@ void PlayThread::load(const SongData& s) {
     auto* t = new Track(s.tracks[i], m_conf, m_options);
     m_tracks[i] = t;
 
-    auto file = new FFMPEGFileInput<double>(m_tracks[i]->getFile(), m_conf);
+    auto file = new FFMPEGFileInput<double>(
+        m_tracks[i]->getFile().toStdString(), m_conf);
     m_maxBufferCount = file->v(0).size() / m_conf.bufferSize;
     emit beatCountChanged(file->v(0).size() / double(m_conf.samplingRate));
 

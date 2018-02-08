@@ -6,7 +6,7 @@
  * @brief Song informations representation
  */
 
-#include <string>
+#include <QString>
 #include <vector>
 
 /**
@@ -17,16 +17,13 @@ struct TrackData {
   TrackData(TrackData&&) = default;
   TrackData(const TrackData&) = delete;
 
-  TrackData(const std::string n,
-            const std::string f,
-            const double v,
-            const double p)
+  TrackData(const QString n, const QString f, const double v, const double p)
       : name(n), file(f), volume(v), pan(p) {}
 
   TrackData& operator=(TrackData&&) = default;
   TrackData& operator=(const TrackData&) = delete;
-  const std::string name{};
-  const std::string file{}; /*< Track's file name */
+  const QString name{};
+  const QString file{}; /*< Track's file name */
   const double volume{};
   const double pan{};
 };
@@ -41,7 +38,7 @@ struct SongData {
 
   std::vector<TrackData> tracks{}; /*< Song's list of tracks */
   int tempo{};
-  std::string name{};
+  QString name{};
   int sigNumerator{};
   int sigDenominator{};
 };

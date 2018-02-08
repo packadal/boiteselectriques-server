@@ -34,7 +34,8 @@ class Server : public QObject {
   friend class SaveManager;
 
  private:
-  PlayThread* m_player;                /*< Audio play manager */
+  PlayThread* m_player; /*< Audio play manager */
+  QThread m_playThread;
   SaveManager m_saveManager;           /*< File handling manager */
   SerialManager m_serialManager{this}; /*< Interface with serial port */
 
@@ -46,11 +47,10 @@ class Server : public QObject {
   int m_nbChannels;
   QString m_currentFile;
 
-  bool m_loaded{false};  /*< Indicate if a song has been loaded */
-  bool m_playing{false}; /*< Indicate if a song is playing */
+  bool m_loaded{false}; /*< Indicate if a song has been loaded */
 
   int m_tempo;
-  double m_beatCount;
+  int m_beatCount;
   // Optimization : Comparison with the previous beat
   int m_previousBeat{-1};
 
@@ -228,6 +228,8 @@ class Server : public QObject {
    */
   void resetThreshold();
 
+  void playSong();
+
  public slots:
   /**
    * @brief Reset the values to default
@@ -250,7 +252,7 @@ class Server : public QObject {
    * @brief Load the song
    * @return Loading status (0 = successful, 1 else)
    */
-  int load();
+  bool load();
 
   /**
    * @brief Stop the song
@@ -287,9 +289,14 @@ class Server : public QObject {
 
   /**
    * @brief Send the actual beat count
-   * @param beat Beat count
    */
-  void sendBeatCount(int beat);
+  void sendBeatCount();
+
+  /**
+   * @brief Send the beat
+   * @param beat
+   */
+  void sendBeat(int beat);
   /**
    * @brief Send the actual song's title
    */

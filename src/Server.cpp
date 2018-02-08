@@ -80,22 +80,26 @@ Server::Server(QSettings* opt) : m_options(opt) {
   ledOn();
 
   m_player = new PlayThread(m_options);
+  m_player->moveToThread(&m_playThread);
+  connect(m_player, &PlayThread::actualBeatChanged, this, &Server::updateBeat,
+          Qt::DirectConnection);
+  connect(m_player, &PlayThread::beatCountChanged, this,
+          &Server::updateBeatCount);
+  connect(m_player, &PlayThread::songLoaded, this, &Server::onSongLoaded);
+  connect(m_player, &PlayThread::playChanged, this, &Server::sendPlay);
+
+  connect(this, &Server::updateThreshold, m_player, &PlayThread::setThreshold);
+  connect(this, &Server::resetThreshold, m_player, &PlayThread::resetThreshold);
+  connect(this, &Server::playSong, m_player, &PlayThread::playSong);
+
+  connect(&m_serialManager, &SerialManager::boxActivated, this,
+          &Server::switchBox);
+
+  m_playThread.start();
 
   m_receiver = new OscReceiver(m_options->value("osc/receiver").toUInt());
   m_sender = new OscSender(m_options->value("osc/ip").toString().toStdString(),
                            m_options->value("osc/sender").toInt());
-
-  connect(this, &Server::updateThreshold, m_player, &PlayThread::setThreshold);
-  connect(this, &Server::resetThreshold, m_player, &PlayThread::resetThreshold);
-
-  connect(m_player, &PlayThread::actualBeatChanged, this, &Server::updateBeat);
-  connect(m_player, &PlayThread::beatCountChanged, this,
-          &Server::updateBeatCount);
-
-  connect(m_player, &PlayThread::songLoaded, this, &Server::onSongLoaded);
-
-  connect(&m_serialManager, &SerialManager::boxActivated, this,
-          &Server::switchBox);
 
 // this allows to build and run on a PC for easier development
 #ifdef __arm__
@@ -149,11 +153,11 @@ Server::~Server() {
 
   m_player->stop();
   qDebug() << "PlayThread stopping...";
-  if (!m_player->wait(5000)) {
+  if (!m_playThread.wait(5000)) {
     qWarning("PlayThread : Potential deadlock detected !! Terminating...");
-    m_player->terminate();
-    m_player->wait(5000);
-    m_player->exit(1);
+    m_playThread.terminate();
+    m_playThread.wait(5000);
+    m_playThread.exit(1);
   }
 
   qDebug() << "SerialManager stopping...";
@@ -237,8 +241,8 @@ void Server::sendMasterVolume() {
 }
 
 void Server::sendPlay() {
-  m_sender->send(osc::MessageGenerator()("/box/play", m_tempo));
-  qDebug() << "sent /box/play" << m_tempo;
+  m_sender->send(osc::MessageGenerator()("/box/play", m_player->isPlaying()));
+  qDebug() << "sent /box/play" << m_player->isPlaying();
 }
 
 void Server::sendMute() {
@@ -255,7 +259,7 @@ void Server::sendTracksList() {
   QStringList tracks;
   for (unsigned char i = 0; i < m_player->getTracksCount(); ++i) {
     if (m_player->isValidTrack(i)) {
-      tracks << QString::fromStdString(m_player->track(i)->getName());
+      tracks << m_player->track(i)->getName();
     }
   }
   QByteArray trackList = tracks.join('|').toUtf8();
@@ -458,7 +462,7 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
 
   sendSongsList();
   sendThreshold();
-
+  sendBeat(m_previousBeat);
   sendSongTitle();
   sendTracksList();
   sendActivatedTracks();
@@ -470,8 +474,7 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
     sendTrackPan(i, m_player->pan(i));
   }
 
-  m_sender->send(
-      osc::MessageGenerator()("/box/playing", !m_player->isStopped()));
+  sendPlay();
 
   sendReady(m_player->getTracksCount() > 0);
 }
@@ -490,20 +493,19 @@ void Server::switchBox(unsigned int i, int val) {
 }
 
 void Server::play() {
-  if (!m_loaded)
-    if (load())
-      return;
+  if (!m_loaded) {
+    load();
+    return;
+  }
 
-  sendPlay();
-  m_player->start();
-  m_playing = true;
+  //  m_player->playSong();
+  emit playSong();
 }
 
 void Server::stop() {
-  if (m_loaded && m_playing) {
+  if (m_loaded && m_player->isPlaying()) {
     m_player->stop();
     m_previousBeat = 0;
-    m_playing = false;
 
     updateBeat(0);
   }
@@ -514,13 +516,13 @@ void Server::updateBeat(double t) {  // in seconds
   int time = (int)(t * m_tempo / 60.0f) + 1;
   time = time % 33;
 
-  if (time != m_previousBeat && time <= m_beatCount && !m_player->isStopped()) {
+  if (time != m_previousBeat && time <= m_beatCount && m_player->isPlaying()) {
     m_previousBeat = time;
 
-    sendBeatCount(time);
-  } else if (m_player->isStopped()) {
+    sendBeat(time);
+  } else if (!m_player->isPlaying()) {
     m_previousBeat = 0;
-    sendBeatCount(0);
+    sendBeat(0);
   }
 }
 
@@ -528,8 +530,10 @@ void Server::updateBeatCount(double t) {  // in seconds
   // Here we calculate the number of beats in the loop
   // Formula : seconds * tempo/60 = nb. beats in loop.
 
-  m_beatCount = t * m_tempo / 60.0;
+  m_beatCount = t * m_tempo / 60;
   m_previousBeat = -1;
+
+  sendBeatCount();
 }
 
 void Server::onSongLoaded(unsigned int on, unsigned int max) {
@@ -554,7 +558,7 @@ void Server::handle__box_deleteSong(osc::ReceivedMessageArgumentStream args) {
   sendSongsList();
 }
 
-int Server::load() {
+bool Server::load() {
   ledOn(m_options->value("gpio/warning").toInt());
 
   if (!m_selSong.isEmpty()) {
@@ -575,17 +579,17 @@ int Server::load() {
         sendSongTitle();
 
         ledOff(m_options->value("gpio/warning").toInt());
-        return 0;
+        return false;
       }
       ledOff(m_options->value("gpio/warning").toInt());
-      return 1;
+      return true;
     } catch (std::exception& e) {
       qCritical() << tr("LOADING ERROR :") << e.what();
       ledOff(m_options->value("gpio/warning").toInt());
-      return 1;
+      return true;
     }
   }  // end check selsong
 
   ledOff(m_options->value("gpio/warning").toInt());
-  return 1;
+  return true;
 }
