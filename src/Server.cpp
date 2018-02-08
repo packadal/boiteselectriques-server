@@ -464,6 +464,7 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
 
   sendSongsList();
   sendThreshold();
+  sendBeatCount();
   sendBeat(m_previousBeat);
   sendSongTitle();
   sendTracksList();

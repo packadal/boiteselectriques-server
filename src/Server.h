@@ -50,7 +50,7 @@ class Server : public QObject {
   bool m_loaded{false}; /*< Indicate if a song has been loaded */
 
   int m_tempo;
-  int m_beatCount;
+  int m_beatCount = 32;
   // Optimization : Comparison with the previous beat
   int m_previousBeat{-1};
 
