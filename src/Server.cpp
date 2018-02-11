@@ -18,8 +18,7 @@
 #define DEFAULT_SENDER 9989
 #define DEFAULT_RECEIVER 9988
 
-#define DEFAULT_THRESHOLD 50     /*< Default threshold value */
-#define DEFAULT_MASTER_VOLUME 50 /*< Default master volume value */
+#define DEFAULT_THRESHOLD 50 /*< Default threshold value */
 
 #define DEFAULT_VOLUME 50
 #define DEFAULT_PAN 0
@@ -63,11 +62,13 @@ void Server::ledOff() {
 }
 
 void Server::ledBlink() {
+#ifdef __arm__
   for (int i = 0; i < 2; i++) {
     ledOff();
     usleep(300);
     ledOn();
   }
+#endif
 }
 
 Server::Server(QSettings* opt) : m_options(opt) {
@@ -187,7 +188,6 @@ bool Server::initConf(QSettings* c) {
   QList<struct Settings> default_settings;
 
   default_settings.append(Settings("default/threshold", DEFAULT_THRESHOLD));
-  default_settings.append(Settings("default/master", DEFAULT_MASTER_VOLUME));
   default_settings.append(Settings("default/volume", DEFAULT_VOLUME));
   default_settings.append(Settings("default/pan", DEFAULT_PAN));
   default_settings.append(Settings("default/activation", DEFAULT_ACTIVATION));
@@ -236,8 +236,8 @@ void Server::sendActivatedTracks() {
 
 void Server::sendMasterVolume() {
   m_sender->send(osc::MessageGenerator()(
-      "/box/master", m_options->value("default/master").toInt()));
-  qDebug() << "sent /box/master" << m_options->value("default/master").toInt();
+      "/box/master", static_cast<int>(m_player->masterVolume())));
+  qDebug() << "sent /box/master" << m_player->masterVolume();
 }
 
 void Server::sendPlay() {
@@ -274,7 +274,7 @@ void Server::sendBeatCount() {
 
 void Server::sendBeat(int beat) {
   m_sender->send(osc::MessageGenerator()("/box/beat", beat));
-  qDebug() << "sent /box/beat" << beat;
+  //  qDebug() << "sent /box/beat" << beat;
 }
 
 void Server::sendSongsList() {
@@ -387,7 +387,6 @@ void Server::handle__box_master(osc::ReceivedMessageArgumentStream args) {
   qDebug() << "received /box/master" << vol;
 
   ledBlink();
-  m_options->setValue("default/master", QVariant::fromValue<int>(vol));
 
   m_player->setMasterVolume(vol);
 }
@@ -448,11 +447,7 @@ void Server::handle__box_selectSong(osc::ReceivedMessageArgumentStream args) {
 
   load();
 
-  sendTracksList();
-  for (unsigned char i = 0; i < m_player->getTracksCount(); ++i) {
-    sendTrackVolume(i, m_player->volume(i));
-    sendTrackPan(i, m_player->pan(i));
-  }
+  updateTrackStatus();
 }
 
 void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
@@ -482,10 +477,21 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
   sendReady(m_player->getTracksCount() > 0);
 }
 
+void Server::updateTrackStatus() {
+  sendMute();
+  sendActivatedTracks();
+  for (unsigned char i = 0; i < m_player->getTracksCount(); ++i) {
+    sendTrackVolume(i, m_player->volume(i));
+    sendTrackPan(i, m_player->pan(i));
+  }
+}
+
 void Server::reset() {
   stop();
 
   m_player->reset();
+
+  updateTrackStatus();
 }
 
 void Server::switchBox(unsigned int i, int val) {

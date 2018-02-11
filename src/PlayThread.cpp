@@ -20,7 +20,7 @@ PlayThread::PlayThread(QSettings* c) : m_options(c) {
   resetThreshold();
 
   // make sure the master volume is properly initialized
-  setMasterVolume(m_options->value("default/master").toUInt());
+  setMasterVolume(DEFAULT_MASTER_VOLUME);
 }
 
 size_t PlayThread::getTracksCount() const {
@@ -40,7 +40,12 @@ int PlayThread::getThreshold() const {
 }
 
 void PlayThread::setMasterVolume(const unsigned int vol) {
-  m_masterVolume->setGain(vol / 10.0);
+  m_masterVolumeValue = vol;
+  m_masterVolume->setGain(m_masterVolumeValue / 10.0);
+}
+
+unsigned int PlayThread::masterVolume() const {
+  return m_masterVolumeValue;
 }
 
 void PlayThread::setVolume(const size_t track, const unsigned int vol) {
@@ -103,7 +108,7 @@ bool PlayThread::isPlaying() const {
 }
 
 void PlayThread::reset() {
-  setMasterVolume(m_options->value("default/master").toInt());
+  setMasterVolume(DEFAULT_MASTER_VOLUME);
 
   for (auto& track : m_tracks)
     track->reset();

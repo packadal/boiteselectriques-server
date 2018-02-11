@@ -335,6 +335,8 @@ class Server : public QObject {
   void sendPlay();
 
   void sendMute();
+protected:
+  void updateTrackStatus();
 };
 
 #endif  // SERVER_H

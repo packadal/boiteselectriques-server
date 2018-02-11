@@ -95,6 +95,11 @@ class PlayThread : public QObject {
    */
   void setMasterVolume(const unsigned int vol);
   /**
+   * @brief masterVolume getter
+   * @return the master volume
+   */
+  unsigned int masterVolume() const;
+  /**
    * @brief Track volume setter
    * @param track Related track number
    * @param vol New volume (between 0 and 100)
@@ -217,6 +222,9 @@ class PlayThread : public QObject {
 
   bool m_isPlaying{false};
   int m_threshold;
+  unsigned int m_masterVolumeValue = DEFAULT_MASTER_VOLUME;
+
+  static const unsigned int DEFAULT_MASTER_VOLUME = 50;
 };
 
 #endif  // PLAYTHREAD_H
