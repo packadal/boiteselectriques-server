@@ -241,6 +241,7 @@ void Server::sendMasterVolume() {
 }
 
 void Server::sendPlay() {
+  m_playSignalSent = false;
   m_sender->send(osc::MessageGenerator()("/box/play", m_player->isPlaying()));
   qDebug() << "sent /box/play" << m_player->isPlaying();
 }
@@ -506,8 +507,10 @@ void Server::play() {
     return;
   }
 
-  //  m_player->playSong();
-  emit playSong();
+  if (!m_playSignalSent) {
+    m_playSignalSent = true;
+    emit playSong();
+  }
 }
 
 void Server::stop() {

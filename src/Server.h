@@ -54,6 +54,8 @@ class Server : public QObject {
   // Optimization : Comparison with the previous beat
   int m_previousBeat{-1};
 
+  bool m_playSignalSent = false;
+
   OscReceiver* m_receiver; /*< Receiving interface with OSC protocol */
   OscSender* m_sender;     /*< Sending interface with OSC protocol */
 
@@ -335,7 +337,8 @@ class Server : public QObject {
   void sendPlay();
 
   void sendMute();
-protected:
+
+ protected:
   void updateTrackStatus();
 };
 
