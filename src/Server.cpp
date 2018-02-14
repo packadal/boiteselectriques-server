@@ -446,8 +446,6 @@ void Server::handle__box_selectSong(osc::ReceivedMessageArgumentStream args) {
     m_selSong = so;
 
   load();
-
-  updateTrackStatus();
 }
 
 void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
@@ -546,8 +544,11 @@ void Server::updateBeatCount(double t) {  // in seconds
 }
 
 void Server::onSongLoaded(unsigned int on, unsigned int max) {
-  if (on == max)
+  if (on == max) {
+    sendTracksList();
+    updateTrackStatus();
     sendReady(true);
+  }
 }
 
 void Server::sendTrackVolume(int track, int volume) {
