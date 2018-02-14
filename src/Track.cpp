@@ -89,10 +89,11 @@ void Track::setSolo(const bool state) {
 void Track::reset() {
   m_options->beginGroup("default");
 
-  setVolume(m_options->value("volume").toInt());
-  setPan(m_options->value("pan").toInt());
-  setActivated(m_options->value("activation").toBool());
+  setVolume(50);
+  setPan(0);
+  setActivated(false);
   setMute(false);
+  setSolo(false);
 
   m_options->endGroup();
 }

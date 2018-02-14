@@ -421,6 +421,7 @@ void Server::handle__box_reset(osc::ReceivedMessageArgumentStream args) {
 
   m_player->reset();
 
+  updateTrackStatus();
   sendActivatedTracks();
   sendMute();
 }
