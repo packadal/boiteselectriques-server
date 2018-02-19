@@ -368,6 +368,16 @@ void Server::handle__box_mute(osc::ReceivedMessageArgumentStream args) {
   sendMute();
 }
 
+void Server::sendSolo() {
+  int soloStatus = 0;
+  for (unsigned char i = 0; i < m_player->getTracksCount(); ++i) {
+    soloStatus += (m_player->isValidTrack(i) && m_player->track(i)->isSolo())
+                      ? (1 << i)
+                      : 0;
+  }
+  m_sender->send(osc::MessageGenerator()("/box/solo", soloStatus));
+}
+
 void Server::handle__box_solo(osc::ReceivedMessageArgumentStream args) {
   osc::int32 box;
   bool state;
@@ -376,7 +386,7 @@ void Server::handle__box_solo(osc::ReceivedMessageArgumentStream args) {
 
   ledBlink();
   m_player->solo(box, state);
-  m_sender->send(osc::MessageGenerator()("/box/solo", box, state));
+  sendSolo();
 
   sendMute();
   sendActivatedTracks();
@@ -425,6 +435,7 @@ void Server::handle__box_reset(osc::ReceivedMessageArgumentStream args) {
   updateTrackStatus();
   sendActivatedTracks();
   sendMute();
+  sendSolo();
 }
 
 void Server::handle__box_refreshSong(osc::ReceivedMessageArgumentStream args) {

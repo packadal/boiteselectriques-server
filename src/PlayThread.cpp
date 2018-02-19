@@ -122,16 +122,28 @@ void PlayThread::solo(const size_t track, const bool state) {
   if (isValidTrack(track))
     m_tracks[track]->setActivated(true);
 
+  bool soloTracks = false;
   for (unsigned char i = 0; i < m_tracks.size(); ++i) {
     if (!isValidTrack(i))
       continue;
 
     Track* currentTrack = m_tracks[i];
-    // this will only be true for the track passed as parameter if 'state' is
-    // true, in all other cases this will be false.
-    const bool currentTrackIsTarget = state && (i != track);
-    currentTrack->setSolo(currentTrackIsTarget);
-    currentTrack->setMute(currentTrackIsTarget);
+    if (i == track) {
+      currentTrack->setMute(!state);
+      currentTrack->setSolo(state);
+    }
+    if (!currentTrack->isSolo()) {
+      currentTrack->setMute(true);
+    } else {
+      soloTracks = true;
+    }
+  }
+
+  // if no track is solo-ing, un-mute all of them
+  if (!soloTracks) {
+    for (unsigned char i = 0; i < m_tracks.size(); ++i) {
+      m_tracks[i]->setMute(false);
+    }
   }
 }
 

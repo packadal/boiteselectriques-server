@@ -219,7 +219,9 @@ class Server : public QObject {
    * @brief Make the LED defined in config file blink
    */
   void ledBlink();
- signals:
+  void sendSolo();
+
+signals:
   /**
    * @brief Notify of a new threshold value
    * @param threshold New threshold value
