@@ -474,14 +474,8 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
   sendBeat(m_previousBeat);
   sendSongTitle();
   sendTracksList();
-  sendActivatedTracks();
   sendMasterVolume();
-  sendMute();
-
-  for (unsigned char i = 0; i < m_player->getTracksCount(); ++i) {
-    sendTrackVolume(i, m_player->volume(i));
-    sendTrackPan(i, m_player->pan(i));
-  }
+  updateTrackStatus();
 
   sendPlay();
 
@@ -490,6 +484,7 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
 
 void Server::updateTrackStatus() {
   sendMute();
+  sendSolo();
   sendActivatedTracks();
   for (unsigned char i = 0; i < m_player->getTracksCount(); ++i) {
     sendTrackVolume(i, m_player->volume(i));
