@@ -195,9 +195,8 @@ void PlayThread::load(const SongData& s) {
         new Sequence<double>(m_conf, m_tracks[i]->getVolumePtr(),
                              m_tracks[i]->getPanPtr(),
                              m_tracks[i]->getMutePtr())));
-
-    emit songLoaded(i + 1, track_count);
   }
+  emit songLoaded();
 
   // Master
   auto input = Input_p(new SfxInputProxy<double>(

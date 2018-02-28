@@ -277,10 +277,8 @@ signals:
 
   /**
    * @brief Actions to perform at the end of the song's loading
-   * @param on Next track number
-   * @param max Max track number
    */
-  void onSongLoaded(unsigned int on, unsigned int max);
+  void onSongLoaded();
 
   /***************************
    * TRANSMISSIONS TO CLIENT *

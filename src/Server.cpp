@@ -558,12 +558,10 @@ void Server::updateBeatCount(double t) {  // in seconds
   sendBeatCount();
 }
 
-void Server::onSongLoaded(unsigned int on, unsigned int max) {
-  if (on == max) {
-    sendTracksList();
-    updateTrackStatus();
-    sendReady(true);
-  }
+void Server::onSongLoaded() {
+  sendTracksList();
+  updateTrackStatus();
+  sendReady(true);
 }
 
 void Server::sendTrackVolume(int track, int volume) {

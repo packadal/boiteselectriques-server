@@ -77,10 +77,8 @@ class PlayThread : public QObject {
   void beatCountChanged(double time);
   /**
    * @brief Notify of the song loading end
-   * @param on Next track number
-   * @param max Max track number
    */
-  void songLoaded(int, int);
+  void songLoaded();
 
  public slots:
 
