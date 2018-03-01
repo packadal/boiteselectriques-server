@@ -80,6 +80,9 @@ Server::Server(QSettings* opt) : m_options(opt) {
 #endif
   ledOn();
 
+  m_threshold =
+      m_options->value("default/threshold", DEFAULT_THRESHOLD).toInt();
+
   m_player = new PlayThread(m_options);
   m_player->moveToThread(&m_playThread);
   connect(m_player, &PlayThread::actualBeatChanged, this, &Server::updateBeat,
@@ -89,8 +92,6 @@ Server::Server(QSettings* opt) : m_options(opt) {
   connect(m_player, &PlayThread::songLoaded, this, &Server::onSongLoaded);
   connect(m_player, &PlayThread::playChanged, this, &Server::sendPlay);
 
-  connect(this, &Server::updateThreshold, m_player, &PlayThread::setThreshold);
-  connect(this, &Server::resetThreshold, m_player, &PlayThread::resetThreshold);
   connect(this, &Server::playSong, m_player, &PlayThread::playSong);
 
   connect(&m_serialManager, &SerialManager::boxActivated, this,
@@ -180,10 +181,6 @@ Server::~Server() {
   ledOff(led);
 }
 
-int Server::getThreshold() const {
-  return m_player->getThreshold();
-}
-
 bool Server::initConf(QSettings* c) {
   QList<struct Settings> default_settings;
 
@@ -224,8 +221,8 @@ void Server::sendReady(bool isReady) {
 }
 
 void Server::sendThreshold() {
-  m_sender->send(osc::MessageGenerator()("/box/sensor", getThreshold()));
-  qDebug() << "sent /box/sensor" << getThreshold();
+  m_sender->send(osc::MessageGenerator()("/box/sensor", m_threshold));
+  qDebug() << "sent /box/sensor" << m_threshold;
 }
 
 void Server::sendActivatedTracks() {
@@ -302,7 +299,8 @@ void Server::handle__box_updateThreshold(
   qDebug() << "received /box/update_threshold" << senseUpdated;
 
   ledBlink();
-  emit updateThreshold(senseUpdated);
+  m_threshold = senseUpdated;
+  m_options->setValue("default/threshold", m_threshold);
   sendThreshold();
 }
 
@@ -495,11 +493,17 @@ void Server::reset() {
   updateTrackStatus();
 }
 
-void Server::switchBox(unsigned int i, int val) {
-  if (val >= m_player->getThreshold()) {
-    m_player->switchBox(i);
+void Server::switchBox(unsigned int track, int val) {
+  // val here ranges from 0 to ~700, so we use 800 as upper bound to be safe
+  // m_threshold is between 0 and 100
+  // map val from [0;800] to [0;100]
+  const double maximumInputValue = 800;
+  const double maximumScaledValue = 100;
+  const double scaledValue = (val / maximumInputValue) * maximumScaledValue;
+  if (scaledValue >= m_threshold) {
+    m_player->switchBox(track);
+    sendActivatedTracks();
   }
-  sendActivatedTracks();
 }
 
 void Server::play() {

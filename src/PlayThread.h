@@ -47,11 +47,6 @@ class PlayThread : public QObject {
    * @return Count of activated tracks
    */
   int getActivatedTracks() const;
-  /**
-   * @brief Threshold getter
-   * @return Raw threshold value
-   */
-  int getThreshold() const;
 
   /**
    * @brief Give the playing status
@@ -174,17 +169,6 @@ class PlayThread : public QObject {
   void setTrackActivated(unsigned int track, bool activated);
 
   /**
-   * @brief Threshold setter
-   * @param "New" (not raw) threshold value (0-100)
-   */
-  void setThreshold(int threshold);
-
-  /**
-   * @brief Reset threshold to its default value
-   */
-  void resetThreshold();
-
-  /**
    * @brief Regularly called to update the beat value
    */
   void timeHandle();
@@ -219,7 +203,6 @@ class PlayThread : public QObject {
   int m_maxBufferCount{}; /*< Total buffer count in a loop */
 
   bool m_isPlaying{false};
-  int m_threshold;
   unsigned int m_masterVolumeValue = DEFAULT_MASTER_VOLUME;
 
   static const unsigned int DEFAULT_MASTER_VOLUME = 50;

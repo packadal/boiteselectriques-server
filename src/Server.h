@@ -182,12 +182,6 @@ class Server : public QObject {
   ~Server();
 
   /**
-   * @brief Calculate the threshold value
-   * @return Threshold value to transmit
-   */
-  int getThreshold() const;
-
-  /**
    * @brief Load or initialize the configuration options
    * @param c Pointer to the options data
    * @return If the config options have been loaded (true) or generated from the
@@ -219,12 +213,12 @@ class Server : public QObject {
   void ledBlink();
   void sendSolo();
 
-signals:
+ signals:
   /**
    * @brief Notify of a new threshold value
    * @param threshold New threshold value
    */
-  void updateThreshold(int m_threshold);
+  void updateThreshold(int threshold);
   /**
    * @brief Notify the threshold reset
    */

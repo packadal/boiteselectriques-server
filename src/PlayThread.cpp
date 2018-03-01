@@ -17,8 +17,6 @@
 #include <QDebug>
 
 PlayThread::PlayThread(QSettings* c) : m_options(c) {
-  resetThreshold();
-
   // make sure the master volume is properly initialized
   setMasterVolume(DEFAULT_MASTER_VOLUME);
 }
@@ -33,10 +31,6 @@ int PlayThread::getActivatedTracks() const {
     res += (m_tracks[i]->isActivated() ? pow(2, i) : 0);
 
   return res;
-}
-
-int PlayThread::getThreshold() const {
-  return m_threshold;
 }
 
 void PlayThread::setMasterVolume(const unsigned int vol) {
@@ -156,15 +150,6 @@ void PlayThread::setTrackActivated(unsigned int track, bool activated) {
   if (isValidTrack(track)) {
     m_tracks[track]->setActivated(activated);
   }
-}
-
-void PlayThread::setThreshold(int threshold) {
-  m_threshold = threshold;
-  m_options->setValue("default/threshold", m_threshold);
-}
-
-void PlayThread::resetThreshold() {
-  setThreshold(m_options->value("default/threshold").toInt());
 }
 
 void PlayThread::load(const SongData& s) {

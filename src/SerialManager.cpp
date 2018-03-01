@@ -50,12 +50,11 @@ void SerialManager::run() {
     }
   }
 #else  // On Raspberry Pi
-  int PadCutOff[8] = {300, 300, 300, 300, 300, 300, 300, 300};
-  int MaxPlayTime[8] = {90, 90, 90, 90, 90, 90, 90, 90};
+  const int PadCutOff = 300;
+  const int MaxPlayTime = 90;
   bool ActivePad[8] = {false, false, false, false, false, false, false, false};
   int PinPlayTime[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-  int pin = 0;
-  int hitavg = 0;
+  int TriggerHitValue[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
   this->m_isRunning = true;
 
@@ -64,23 +63,28 @@ void SerialManager::run() {
   mcp3004Setup(BASE, SPI_CHAN);
 
   while (this->m_isRunning) {
-    for (pin = 0; pin < 8; pin++) {
-      hitavg = analogRead(BASE + pin);
+    for (unsigned char pin = 0; pin < 8; pin++) {
+      const int hitValue = analogRead(BASE + pin);
 
-      if (hitavg > PadCutOff[pin]) {
-        if (ActivePad[pin] == false) {
-          emit boxActivated(pin, 0);
-          PinPlayTime[pin] = 0;
-          ActivePad[pin] = true;
-        } else {
-          PinPlayTime[pin] = PinPlayTime[pin] + 1;
-        }
-      } else if (ActivePad[pin] == true) {
-        PinPlayTime[pin] = PinPlayTime[pin] + 1;
-        if (PinPlayTime[pin] > MaxPlayTime[pin]) {
+      if (ActivePad[pin]) {
+        // if the pin is active, increment its playtime
+        PinPlayTime[pin] += 1;
+        // if the playtime is large enough that the hit is probably finished,
+        // send an event to the server indicating we were hit
+        if (PinPlayTime[pin] > MaxPlayTime) {
           ActivePad[pin] = false;
-          emit boxActivated(pin, hitavg + 300);
+          emit boxActivated(pin, TriggerHitValue[pin]);
         }
+      } else if (hitValue > PadCutOff) {
+        // if the current pin is not active
+        // and we consider the hit strong enough to not be background noise
+        // then we activate it and set its playtime to 0
+
+        PinPlayTime[pin] = 0;
+        ActivePad[pin] = true;
+        // decrement the value by PadCutOff so that 0 is the
+        // lowest hit value that can possibly trigger the event
+        TriggerHitValue[pin] = hitValue - PadCutOff;
       }
     }
   }
