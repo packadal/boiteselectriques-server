@@ -50,9 +50,7 @@ class Server : public QObject {
   bool m_loaded{false}; /*< Indicate if a song has been loaded */
 
   int m_tempo;
-  int m_beatCount = 32;
-  // Optimization : Comparison with the previous beat
-  int m_previousBeat{-1};
+  double m_trackDuration = 0.0;
 
   bool m_playSignalSent = false;
 
@@ -290,15 +288,10 @@ signals:
   void sendTrackPan(int track, int pan);
 
   /**
-   * @brief Send the actual beat count
-   */
-  void sendBeatCount();
-
-  /**
    * @brief Send the beat
    * @param beat
    */
-  void sendBeat(int beat);
+  void sendBeat(double beat);
   /**
    * @brief Send the actual song's title
    */

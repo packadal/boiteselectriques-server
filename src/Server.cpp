@@ -269,11 +269,7 @@ void Server::sendTracksList() {
   qDebug() << "sent /box/tracks_list" << trackListChar;
 }
 
-void Server::sendBeatCount() {
-  m_sender->send(osc::MessageGenerator()("/box/beat_count", m_beatCount));
-}
-
-void Server::sendBeat(int beat) {
+void Server::sendBeat(double beat) {
   m_sender->send(osc::MessageGenerator()("/box/beat", beat));
   //  qDebug() << "sent /box/beat" << beat;
 }
@@ -470,8 +466,7 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
 
   sendSongsList();
   sendThreshold();
-  sendBeatCount();
-  sendBeat(m_previousBeat);
+  sendBeat(0.0);
   sendSongTitle();
   sendTracksList();
   sendMasterVolume();
@@ -522,35 +517,20 @@ void Server::play() {
 void Server::stop() {
   if (m_loaded && m_player->isPlaying()) {
     m_player->stop();
-    m_previousBeat = 0;
-
     updateBeat(0);
   }
 }
 
 void Server::updateBeat(double t) {  // in seconds
-
-  int time = (int)(t * m_tempo / 60.0f) + 1;
-  time = time % 33;
-
-  if (time != m_previousBeat && time <= m_beatCount && m_player->isPlaying()) {
-    m_previousBeat = time;
-
-    sendBeat(time);
-  } else if (!m_player->isPlaying()) {
-    m_previousBeat = 0;
-    sendBeat(0);
+  if (!m_player->isPlaying()) {
+    sendBeat(0.0);
+  } else {
+    sendBeat(t / m_trackDuration);
   }
 }
 
 void Server::updateBeatCount(double t) {  // in seconds
-  // Here we calculate the number of beats in the loop
-  // Formula : seconds * tempo/60 = nb. beats in loop.
-
-  m_beatCount = t * m_tempo / 60;
-  m_previousBeat = -1;
-
-  sendBeatCount();
+  m_trackDuration = t;
 }
 
 void Server::onSongLoaded() {
