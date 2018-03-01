@@ -37,6 +37,7 @@ class SaveManager : public QObject {
 
  private:
   static std::unique_ptr<QTemporaryDir> tempdir;
+  static const int DEFAULT_VOLUME;
 };
 
 #endif  // SAVEMANAGER_H

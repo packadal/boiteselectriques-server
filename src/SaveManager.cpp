@@ -10,6 +10,7 @@
 #include "Server.h"
 
 std::unique_ptr<QTemporaryDir> SaveManager::tempdir = nullptr;
+const int SaveManager::DEFAULT_VOLUME = 50;
 
 SongData SaveManager::load(const QString& loadpath) {
   //// Temp. dir creation ////
@@ -49,8 +50,7 @@ SongData SaveManager::load(const QString& loadpath) {
         settings.value(QString("Track%1/name").arg(i)).toString(),
         (tempdir->path() + "/" +
          settings.value(QString("Track%1/filename").arg(i)).toString()),
-        settings.value(QString("Track%1/volume").arg(i)).toInt(),
-        settings.value(QString("Track%1/pan").arg(i)).toInt());
+        DEFAULT_VOLUME, settings.value(QString("Track%1/pan").arg(i)).toInt());
   }
 
   return sd;
