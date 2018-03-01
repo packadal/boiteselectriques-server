@@ -44,8 +44,6 @@ class Server : public QObject {
   SongData m_song;   /*< Actual song's data */
   QString m_selSong; /*< Selected song's name */
   int m_threshold;
-  int m_nbChannels;
-  QString m_currentFile;
 
   bool m_loaded{false}; /*< Indicate if a song has been loaded */
 

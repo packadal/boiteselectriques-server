@@ -73,7 +73,6 @@ void Server::ledBlink() {
 
 Server::Server(QSettings* opt) : m_options(opt) {
   initConf(m_options);
-  qDebug() << m_options->fileName();
 
 #ifdef __arm__
   ledSetup();
@@ -150,11 +149,9 @@ Server::Server(QSettings* opt) : m_options(opt) {
 
 Server::~Server() {
   int led = m_options->value("gpio/led").toInt();
-  qDebug() << "Stopping server...";
   stop();
 
   m_player->stop();
-  qDebug() << "PlayThread stopping...";
   if (!m_playThread.wait(5000)) {
     qWarning("PlayThread : Potential deadlock detected !! Terminating...");
     m_playThread.terminate();
@@ -162,7 +159,6 @@ Server::~Server() {
     m_playThread.exit(1);
   }
 
-  qDebug() << "SerialManager stopping...";
   m_serialManager.stop();
   if (!m_serialManager.wait(5000)) {
     qWarning("SerialManager : Potential deadlock detected !! Terminating...");
@@ -171,11 +167,8 @@ Server::~Server() {
     m_serialManager.exit(1);
   }
 
-  qDebug() << "Deleting pointers...";
   delete m_player;
   delete m_options;
-
-  qDebug() << "Stopping CoreApp...";
 
   QCoreApplication::exit(0);
   ledOff(led);
@@ -209,38 +202,34 @@ bool Server::initConf(QSettings* c) {
   // Debugging
   QStringList lst = c->allKeys();
   for (QStringList::const_iterator k = lst.constBegin(); k < lst.constEnd();
-       k++)
+       k++) {
     qDebug() << *k << " : " << c->value(*k).toString();
+  }
 
   return false;
 }
 
 void Server::sendReady(bool isReady) {
   m_sender->send(osc::MessageGenerator()("/box/ready", isReady));
-  qDebug() << "sent /box/ready" << isReady;
 }
 
 void Server::sendThreshold() {
   m_sender->send(osc::MessageGenerator()("/box/sensor", m_threshold));
-  qDebug() << "sent /box/sensor" << m_threshold;
 }
 
 void Server::sendActivatedTracks() {
   m_sender->send(osc::MessageGenerator()("/box/enable_sync",
                                          m_player->getActivatedTracks()));
-  qDebug() << "sent /box/enable_sync" << m_player->getActivatedTracks();
 }
 
 void Server::sendMasterVolume() {
   m_sender->send(osc::MessageGenerator()(
       "/box/master", static_cast<int>(m_player->masterVolume())));
-  qDebug() << "sent /box/master" << m_player->masterVolume();
 }
 
 void Server::sendPlay() {
   m_playSignalSent = false;
   m_sender->send(osc::MessageGenerator()("/box/play", m_player->isPlaying()));
-  qDebug() << "sent /box/play" << m_player->isPlaying();
 }
 
 void Server::sendMute() {
@@ -263,12 +252,10 @@ void Server::sendTracksList() {
   QByteArray trackList = tracks.join('|').toUtf8();
   const char* trackListChar = trackList.data();
   m_sender->send(osc::MessageGenerator()("/box/tracks_list", trackListChar));
-  qDebug() << "sent /box/tracks_list" << trackListChar;
 }
 
 void Server::sendBeat(double beat) {
   m_sender->send(osc::MessageGenerator()("/box/beat", beat));
-  //  qDebug() << "sent /box/beat" << beat;
 }
 
 void Server::sendSongsList() {
@@ -281,7 +268,6 @@ void Server::sendSongsList() {
   const char* c_list = list.data();
 
   m_sender->send(osc::MessageGenerator()("/box/songs_list", c_list));
-  qDebug() << "sent /box/songs_list" << c_list;
 }
 
 void Server::sendSongTitle() {
@@ -289,14 +275,12 @@ void Server::sendSongTitle() {
   const char* c_title = title.data();
 
   m_sender->send(osc::MessageGenerator()("/box/title", c_title));
-  qDebug() << "sent /box/title" << c_title;
 }
 
 void Server::handle__box_updateThreshold(
     osc::ReceivedMessageArgumentStream args) {
   osc::int32 senseUpdated;
   args >> senseUpdated;
-  qDebug() << "received /box/update_threshold" << senseUpdated;
 
   ledBlink();
   m_threshold = senseUpdated;
@@ -308,7 +292,6 @@ void Server::handle__box_resetThreshold(
     osc::ReceivedMessageArgumentStream args) {
   osc::int32 senseUpdated;
   args >> senseUpdated;
-  qDebug() << "received /box/reset_threshold" << senseUpdated;
 
   ledBlink();
   emit resetThreshold();
@@ -319,7 +302,6 @@ void Server::handle__box_enable(osc::ReceivedMessageArgumentStream args) {
   args >> box;
   bool activated;
   args >> activated;
-  qDebug() << "received /box/enable" << box;
 
   ledBlink();
   m_player->setTrackActivated(box, activated);
@@ -330,7 +312,6 @@ void Server::handle__box_volume(osc::ReceivedMessageArgumentStream args) {
   osc::int32 box;
   osc::int32 vol;
   args >> box >> vol;
-  qDebug() << "received /box/volume" << vol;
 
   ledBlink();
   m_player->setVolume(box, vol);
@@ -342,7 +323,6 @@ void Server::handle__box_pan(osc::ReceivedMessageArgumentStream args) {
   osc::int32 box;
   osc::int32 vol;
   args >> box >> vol;
-  qDebug() << "received /box/pan" << box << vol;
 
   ledBlink();
   m_player->setPan(box, vol);
@@ -354,7 +334,6 @@ void Server::handle__box_mute(osc::ReceivedMessageArgumentStream args) {
   osc::int32 box;
   bool state;
   args >> box >> state;
-  qDebug() << "received /box/mute" << box << state;
 
   ledBlink();
   m_player->setMute(box, state);
@@ -376,7 +355,6 @@ void Server::handle__box_solo(osc::ReceivedMessageArgumentStream args) {
   osc::int32 box;
   bool state;
   args >> box >> state;
-  qDebug() << "received /box/solo" << box << state;
 
   ledBlink();
   m_player->solo(box, state);
@@ -389,7 +367,6 @@ void Server::handle__box_solo(osc::ReceivedMessageArgumentStream args) {
 void Server::handle__box_master(osc::ReceivedMessageArgumentStream args) {
   osc::int32 vol;
   args >> vol;
-  qDebug() << "received /box/master" << vol;
 
   ledBlink();
 
@@ -399,7 +376,6 @@ void Server::handle__box_master(osc::ReceivedMessageArgumentStream args) {
 void Server::handle__box_play(osc::ReceivedMessageArgumentStream args) {
   bool state;
   args >> state;
-  qDebug() << "received /box/play" << state;
 
   ledBlink();
   play();
@@ -408,7 +384,6 @@ void Server::handle__box_play(osc::ReceivedMessageArgumentStream args) {
 void Server::handle__box_stop(osc::ReceivedMessageArgumentStream args) {
   bool state;
   args >> state;
-  qDebug() << "received /box/stop" << state;
 
   ledBlink();
   stop();
@@ -417,7 +392,6 @@ void Server::handle__box_stop(osc::ReceivedMessageArgumentStream args) {
 void Server::handle__box_reset(osc::ReceivedMessageArgumentStream args) {
   bool state;
   args >> state;
-  qDebug() << "received /box/reset" << state;
 
   ledBlink();
 
@@ -435,7 +409,6 @@ void Server::handle__box_reset(osc::ReceivedMessageArgumentStream args) {
 void Server::handle__box_refreshSong(osc::ReceivedMessageArgumentStream args) {
   bool state;
   args >> state;
-  qDebug() << "received /box/refresh_song" << state;
 
   ledBlink();
   load();
@@ -444,7 +417,6 @@ void Server::handle__box_refreshSong(osc::ReceivedMessageArgumentStream args) {
 void Server::handle__box_selectSong(osc::ReceivedMessageArgumentStream args) {
   const char* receptSong;
   args >> receptSong;
-  qDebug() << "received /box/select_song" << receptSong;
 
   ledBlink();
 
@@ -458,7 +430,6 @@ void Server::handle__box_selectSong(osc::ReceivedMessageArgumentStream args) {
 void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
   bool state;
   args >> state;
-  qDebug() << "received /box/sync" << state;
 
   ledBlink();
 
@@ -554,7 +525,6 @@ void Server::sendTrackPan(int track, int pan) {
 void Server::handle__box_deleteSong(osc::ReceivedMessageArgumentStream args) {
   const char* receptSong;
   args >> receptSong;
-  qDebug() << "received /box/delete_song" << receptSong;
 
   QFile::remove(m_options->value("files/folder").toString() + receptSong);
   sendSongsList();
@@ -570,7 +540,6 @@ bool Server::load() {
       QString file = m_options->value("files/folder").toString() + m_selSong;
 
       if (!file.isEmpty()) {
-        m_currentFile = file;
         m_song = m_saveManager.load(file);
 
         m_tempo = m_song.tempo;
