@@ -43,7 +43,7 @@ class Server : public QObject {
 
   SongData m_song;   /*< Actual song's data */
   QString m_selSong; /*< Selected song's name */
-  int m_threshold;
+  int m_threshold = 40;
 
   bool m_loaded{false}; /*< Indicate if a song has been loaded */
 

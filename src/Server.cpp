@@ -18,8 +18,6 @@
 #define DEFAULT_SENDER 9989
 #define DEFAULT_RECEIVER 9988
 
-#define DEFAULT_THRESHOLD 50 /*< Default threshold value */
-
 #define DEFAULT_VOLUME 50
 #define DEFAULT_PAN 0
 #define DEFAULT_ACTIVATION false
@@ -78,9 +76,6 @@ Server::Server(QSettings* opt) : m_options(opt) {
   ledSetup();
 #endif
   ledOn();
-
-  m_threshold =
-      m_options->value("default/threshold", DEFAULT_THRESHOLD).toInt();
 
   m_player = new PlayThread(m_options);
   m_player->moveToThread(&m_playThread);
@@ -177,7 +172,6 @@ Server::~Server() {
 bool Server::initConf(QSettings* c) {
   QList<struct Settings> default_settings;
 
-  default_settings.append(Settings("default/threshold", DEFAULT_THRESHOLD));
   default_settings.append(Settings("default/volume", DEFAULT_VOLUME));
   default_settings.append(Settings("default/pan", DEFAULT_PAN));
   default_settings.append(Settings("default/activation", DEFAULT_ACTIVATION));
@@ -284,7 +278,6 @@ void Server::handle__box_updateThreshold(
 
   ledBlink();
   m_threshold = senseUpdated;
-  m_options->setValue("default/threshold", m_threshold);
   sendThreshold();
 }
 
