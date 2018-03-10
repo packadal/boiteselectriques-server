@@ -139,6 +139,9 @@ Server::Server(QSettings* opt) : m_options(opt) {
       "/box/delete_song",
       std::bind(&Server::handle__box_deleteSong, this, std::placeholders::_1));
 
+  m_receiver->addHandler("/box/quit", std::bind(&Server::handle__box_quit, this,
+                                                std::placeholders::_1));
+
   m_receiver->run();
 }
 
@@ -437,6 +440,10 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
   sendPlay();
 
   sendReady(m_player->getTracksCount() > 0);
+}
+
+void Server::handle__box_quit(osc::ReceivedMessageArgumentStream /*args*/) {
+  exit(0);
 }
 
 void Server::updateTrackStatus() {

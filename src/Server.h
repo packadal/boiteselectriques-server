@@ -171,6 +171,12 @@ class Server : public QObject {
    */
   void handle__box_sync(osc::ReceivedMessageArgumentStream args);
 
+  /**
+   * @brief quits the application to ensure everything is reset
+   * @param args unused
+   */
+  void handle__box_quit(osc::ReceivedMessageArgumentStream args);
+
  public:
   /**
    * @brief Constructor of the Server class
