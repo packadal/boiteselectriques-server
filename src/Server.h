@@ -327,6 +327,8 @@ class Server : public QObject {
    */
   void sendPlay();
 
+  void sendImages();
+
   void sendMute();
 
  protected:

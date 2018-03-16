@@ -6,6 +6,7 @@
  * @brief Song informations representation
  */
 
+#include <QImage>
 #include <QString>
 #include <vector>
 
@@ -17,13 +18,18 @@ struct TrackData {
   TrackData(TrackData&&) = default;
   TrackData(const TrackData&) = delete;
 
-  TrackData(const QString n, const QString f, const double v, const double p)
-      : name(n), file(f), volume(v), pan(p) {}
+  TrackData(const QString n,
+            const QString f,
+            const QImage image,
+            const double v,
+            const double p)
+      : name(n), file(f), image(image), volume(v), pan(p) {}
 
   TrackData& operator=(TrackData&&) = default;
   TrackData& operator=(const TrackData&) = delete;
   const QString name{};
   const QString file{}; /*< Track's file name */
+  const QImage image{};
   const double volume{};
   const double pan{};
 };

@@ -37,6 +37,7 @@ SongData SaveManager::load(const QString& loadpath) {
 
   //// Loading
   QSettings settings(iniFile, QSettings::IniFormat);
+  settings.setIniCodec("UTF-8");
   SongData sd;
 
   int count = settings.value("General/trackCount").toInt();
@@ -46,11 +47,15 @@ SongData SaveManager::load(const QString& loadpath) {
   sd.sigDenominator = settings.value("General/sigDenominator").toInt();
 
   for (int i = 0; i < count; ++i) {
+    const QString imageFilename =
+        settings.value(QString("Track%1/image").arg(i), "").toString();
+    QImage image(tempdir->path() + "/" + imageFilename);
     sd.tracks.emplace_back(
         settings.value(QString("Track%1/name").arg(i)).toString(),
         (tempdir->path() + "/" +
          settings.value(QString("Track%1/filename").arg(i)).toString()),
-        DEFAULT_VOLUME, settings.value(QString("Track%1/pan").arg(i)).toInt());
+        image, DEFAULT_VOLUME,
+        settings.value(QString("Track%1/pan").arg(i)).toInt());
   }
 
   return sd;

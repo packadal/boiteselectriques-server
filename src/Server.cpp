@@ -229,6 +229,29 @@ void Server::sendPlay() {
   m_sender->send(osc::MessageGenerator()("/box/play", m_player->isPlaying()));
 }
 
+void Server::sendImages() {
+  for (const TrackData& track : m_song.tracks) {
+    if (track.image.isNull()) {
+      continue;
+    }
+    const QByteArray trackName = track.name.toUtf8();
+    const char* trackNameChar = trackName.data();
+
+    QBuffer dataBuffer;
+    dataBuffer.open(QBuffer::ReadWrite);
+
+    track.image.save(&dataBuffer, "JPG", 50);
+    dataBuffer.close();
+
+    const int size = dataBuffer.buffer().size();
+    osc::Blob b(dataBuffer.buffer().data(), size);
+
+    std::cerr << "sending image: " << trackNameChar << std::endl;
+    m_sender->send(osc::MessageGenerator(1024 * 1024 * 10)("/box/images",
+                                                           trackNameChar, b));
+  }
+}
+
 void Server::sendMute() {
   int muteStatus = 0;
   for (unsigned char i = 0; i < m_player->getTracksCount(); ++i) {
@@ -509,6 +532,7 @@ void Server::updateBeatCount(double t) {  // in seconds
 }
 
 void Server::onSongLoaded() {
+  sendImages();
   sendTracksList();
   updateTrackStatus();
   sendReady(true);
