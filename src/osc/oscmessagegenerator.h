@@ -23,13 +23,9 @@ class MessageGenerator {
   template <typename... T>
   const osc::OutboundPacketStream& operator()(const std::string& name,
                                               const T&... args) {
-    std::cerr << "Message sent: " << name;
-
     p.Clear();
     p << osc::BeginBundleImmediate << osc::BeginMessage(name.c_str());
     subfunc(args...);
-
-    std::cerr << std::endl;
 
     return p;
   }
@@ -41,7 +37,6 @@ class MessageGenerator {
 
   template <typename Arg1, typename... Args>
   void subfunc(const Arg1& arg1, const Args&... args) {
-    std::cerr << " " << arg1;
     p << arg1;
     subfunc(args...);
   }
