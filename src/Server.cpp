@@ -488,10 +488,10 @@ void Server::reset() {
 }
 
 void Server::switchBox(unsigned int track, int val) {
-  // val here ranges from 0 to ~700, so we use 800 as upper bound to be safe
+  // val here ranges from 0 to 1024
   // m_threshold is between 0 and 100
-  // map val from [0;800] to [0;100]
-  const double maximumInputValue = 800;
+  // map val from [0;1024] to [0;100]
+  const double maximumInputValue = 1024;
   const double maximumScaledValue = 100;
   const double scaledValue = (val / maximumInputValue) * maximumScaledValue;
   if (scaledValue >= m_threshold) {

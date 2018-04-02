@@ -50,10 +50,7 @@ void SerialManager::run() {
     }
   }
 #else  // On Raspberry Pi
-  const int PadCutOff = 300;
-  const int MaxPlayTime = 90;
-  bool ActivePad[8] = {false, false, false, false, false, false, false, false};
-  int PinPlayTime[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  const int PadCutOff = 50;
   int TriggerHitValue[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
   this->m_isRunning = true;
@@ -65,26 +62,19 @@ void SerialManager::run() {
   while (this->m_isRunning) {
     for (unsigned char pin = 0; pin < 8; pin++) {
       const int hitValue = analogRead(BASE + pin);
+      const int actualValue = hitValue - PadCutOff;
 
-      if (ActivePad[pin]) {
-        // if the pin is active, increment its playtime
-        PinPlayTime[pin] += 1;
-        // if the playtime is large enough that the hit is probably finished,
-        // send an event to the server indicating we were hit
-        if (PinPlayTime[pin] > MaxPlayTime) {
-          ActivePad[pin] = false;
-          emit boxActivated(pin, TriggerHitValue[pin]);
-        }
-      } else if (hitValue > PadCutOff) {
-        // if the current pin is not active
-        // and we consider the hit strong enough to not be background noise
-        // then we activate it and set its playtime to 0
-
-        PinPlayTime[pin] = 0;
-        ActivePad[pin] = true;
+      // if the hit is strong enough to not be background noise
+      if (actualValue >= 0) {
         // decrement the value by PadCutOff so that 0 is the
         // lowest hit value that can possibly trigger the event
-        TriggerHitValue[pin] = hitValue - PadCutOff;
+        TriggerHitValue[pin] = std::max(TriggerHitValue[pin], actualValue);
+      }
+      // if the value is below the threshold, we have fallen back to
+      // background noise. If there was a triggering hit, send an event
+      if (actualValue < 0 && TriggerHitValue[pin] > 0){
+        emit boxActivated(pin, TriggerHitValue[pin]);
+        TriggerHitValue[pin] = 0;
       }
     }
   }
