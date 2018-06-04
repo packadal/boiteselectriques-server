@@ -102,8 +102,6 @@ bool PlayThread::isPlaying() const {
 }
 
 void PlayThread::reset() {
-  setMasterVolume(DEFAULT_MASTER_VOLUME);
-
   for (auto& track : m_tracks)
     track->reset();
 
