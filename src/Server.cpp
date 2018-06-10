@@ -44,9 +44,7 @@ void Server::ledOn(int n) {
   std::system(c.toStdString().c_str());
 }
 
-void Server::ledOn() {
-  ledOn(m_options->value("gpio/led").toInt());
-}
+void Server::ledOn() { ledOn(m_options->value("gpio/led").toInt()); }
 
 void Server::ledOff(int n) {
   // digitalWrite(n, LOW);
@@ -55,9 +53,7 @@ void Server::ledOff(int n) {
   std::system(c.toStdString().c_str());
 }
 
-void Server::ledOff() {
-  ledOff(m_options->value("gpio/led").toInt());
-}
+void Server::ledOff() { ledOff(m_options->value("gpio/led").toInt()); }
 
 void Server::ledBlink() {
 #ifdef __arm__
@@ -69,7 +65,7 @@ void Server::ledBlink() {
 #endif
 }
 
-Server::Server(QSettings* opt) : m_options(opt) {
+Server::Server(QSettings *opt) : m_options(opt) {
   initConf(m_options);
 
 #ifdef __arm__
@@ -172,7 +168,7 @@ Server::~Server() {
   ledOff(led);
 }
 
-bool Server::initConf(QSettings* c) {
+bool Server::initConf(QSettings *c) {
   QList<struct Settings> default_settings;
 
   default_settings.append(Settings("default/volume", DEFAULT_VOLUME));
@@ -230,25 +226,61 @@ void Server::sendPlay() {
 }
 
 void Server::sendImages() {
-  for (const TrackData& track : m_song.tracks) {
+  static const int maxPacketSize = 1 << 16;
+
+  for (const TrackData &track : m_song.tracks) {
     if (track.image.isNull()) {
       continue;
     }
-    const QByteArray trackName = track.name.toUtf8();
-    const char* trackNameChar = trackName.data();
+    const QByteArray imageName =
+        m_song.name.toUtf8() + " - " + track.name.toUtf8();
+    const char *trackNameChar = imageName.data();
 
     QBuffer dataBuffer;
     dataBuffer.open(QBuffer::ReadWrite);
 
-    track.image.save(&dataBuffer, "JPG", 50);
+    track.image.save(&dataBuffer, "JPG");
     dataBuffer.close();
 
-    const int size = dataBuffer.buffer().size();
-    osc::Blob b(dataBuffer.buffer().data(), size);
+    const int fullImageSize = dataBuffer.buffer().size();
 
     std::cerr << "sending image: " << trackNameChar << std::endl;
-    m_sender->send(osc::MessageGenerator(1024 * 1024 * 10)("/box/images",
-                                                           trackNameChar, b));
+    std::cerr << "size:" << fullImageSize << std::endl;
+
+    // each packet contains:
+    // * one byte for the number of parts
+    // * one byte for the part id
+    // * 4 bytes for the size of the image in the packet
+    // * X bytes for the image name
+    // * Y bytes of data
+
+    // to find out the number of packets required, we take the max packet size,
+    // to which we substract the size that must be in every packet (i.e. part
+    // number, part ID, size of the image in the packet, name of the image) this
+    // gives us the payload size, which we then use to divide size of the image.
+    // We then round up to the nearest int. we add an offset of 200 as a Blob
+    // has an effective size greater than the payload size, since it contains
+    // more info, like the size of the blob.
+    const unsigned int payloadSize =
+        maxPacketSize - 4 - 4 - imageName.size() - 200;
+    const osc::int32 packetCount =
+        std::ceil(fullImageSize / double(payloadSize));
+
+    const char *imageData = dataBuffer.buffer().data();
+
+    for (osc::int32 packetID = 0; packetID < packetCount; ++packetID) {
+
+      const unsigned int remainingImageSize =
+          fullImageSize - packetID * payloadSize;
+      const unsigned int currentPayloadSize =
+          std::min(remainingImageSize,
+                   payloadSize); // fullImageSize - (packetID+1)*payloadSize;
+      osc::Blob imagePart(imageData + packetID * payloadSize,
+                          currentPayloadSize);
+
+      m_sender->send(osc::MessageGenerator(maxPacketSize)(
+          "/box/images", packetCount, packetID, trackNameChar, imagePart));
+    }
   }
 }
 
@@ -270,7 +302,7 @@ void Server::sendTracksList() {
     }
   }
   QByteArray trackList = tracks.join('|').toUtf8();
-  const char* trackListChar = trackList.data();
+  const char *trackListChar = trackList.data();
   m_sender->send(osc::MessageGenerator()("/box/tracks_list", trackListChar));
 }
 
@@ -285,14 +317,14 @@ void Server::sendSongsList() {
       QStringList() << m_options->value("files/extension").toString());
   QStringList fileList = exportFolder.entryList();
   QByteArray list = fileList.join("|").toUtf8();
-  const char* c_list = list.data();
+  const char *c_list = list.data();
 
   m_sender->send(osc::MessageGenerator()("/box/songs_list", c_list));
 }
 
 void Server::sendSongTitle() {
   QByteArray title = m_song.name.toUtf8();
-  const char* c_title = title.data();
+  const char *c_title = title.data();
 
   m_sender->send(osc::MessageGenerator()("/box/title", c_title));
 }
@@ -434,7 +466,7 @@ void Server::handle__box_refreshSong(osc::ReceivedMessageArgumentStream args) {
 }
 
 void Server::handle__box_selectSong(osc::ReceivedMessageArgumentStream args) {
-  const char* receptSong;
+  const char *receptSong;
   args >> receptSong;
 
   ledBlink();
@@ -519,7 +551,7 @@ void Server::stop() {
   }
 }
 
-void Server::updateBeat(double t) {  // in seconds
+void Server::updateBeat(double t) { // in seconds
   if (!m_player->isPlaying()) {
     sendBeat(0.0);
   } else {
@@ -527,7 +559,7 @@ void Server::updateBeat(double t) {  // in seconds
   }
 }
 
-void Server::updateBeatCount(double t) {  // in seconds
+void Server::updateBeatCount(double t) { // in seconds
   m_trackDuration = t;
 }
 
@@ -547,7 +579,7 @@ void Server::sendTrackPan(int track, int pan) {
 }
 
 void Server::handle__box_deleteSong(osc::ReceivedMessageArgumentStream args) {
-  const char* receptSong;
+  const char *receptSong;
   args >> receptSong;
 
   QFile::remove(m_options->value("files/folder").toString() + receptSong);
@@ -578,12 +610,12 @@ bool Server::load() {
       }
       ledOff(m_options->value("gpio/warning").toInt());
       return true;
-    } catch (std::exception& e) {
+    } catch (std::exception &e) {
       qCritical() << tr("LOADING ERROR :") << e.what();
       ledOff(m_options->value("gpio/warning").toInt());
       return true;
     }
-  }  // end check selsong
+  } // end check selsong
 
   ledOff(m_options->value("gpio/warning").toInt());
   return true;
