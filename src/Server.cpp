@@ -226,7 +226,6 @@ void Server::sendPlay() {
 }
 
 void Server::sendImages() {
-  static const int maxPacketSize = 1 << 16;
 
   for (const TrackData &track : m_song.tracks) {
     if (track.image.isNull()) {
@@ -236,51 +235,30 @@ void Server::sendImages() {
         m_song.name.toUtf8() + " - " + track.name.toUtf8();
     const char *trackNameChar = imageName.data();
 
-    QBuffer dataBuffer;
-    dataBuffer.open(QBuffer::ReadWrite);
+    const int maximumImageSize = (1 << 16) - 200 - imageName.size();
+    int quality = 100;
+    int size = -1;
 
-    track.image.save(&dataBuffer, "JPG");
-    dataBuffer.close();
+    QByteArray imageData;
 
-    const int fullImageSize = dataBuffer.buffer().size();
+    do {
+        QBuffer dataBuffer;
+        dataBuffer.open(QBuffer::ReadWrite);
+        track.image.save(&dataBuffer, "JPG", quality);
+        dataBuffer.close();
 
-    std::cerr << "sending image: " << trackNameChar << std::endl;
-    std::cerr << "size:" << fullImageSize << std::endl;
+        size = dataBuffer.size();
 
-    // each packet contains:
-    // * one byte for the number of parts
-    // * one byte for the part id
-    // * 4 bytes for the size of the image in the packet
-    // * X bytes for the image name
-    // * Y bytes of data
+        std::cerr << quality << " => " << size << std::endl;
+        quality -= 10;
 
-    // to find out the number of packets required, we take the max packet size,
-    // to which we substract the size that must be in every packet (i.e. part
-    // number, part ID, size of the image in the packet, name of the image) this
-    // gives us the payload size, which we then use to divide size of the image.
-    // We then round up to the nearest int. we add an offset of 200 as a Blob
-    // has an effective size greater than the payload size, since it contains
-    // more info, like the size of the blob.
-    const unsigned int payloadSize =
-        maxPacketSize - 4 - 4 - imageName.size() - 200;
-    const osc::int32 packetCount =
-        std::ceil(fullImageSize / double(payloadSize));
-
-    const char *imageData = dataBuffer.buffer().data();
-
-    for (osc::int32 packetID = 0; packetID < packetCount; ++packetID) {
-
-      const unsigned int remainingImageSize =
-          fullImageSize - packetID * payloadSize;
-      const unsigned int currentPayloadSize =
-          std::min(remainingImageSize,
-                   payloadSize); // fullImageSize - (packetID+1)*payloadSize;
-      osc::Blob imagePart(imageData + packetID * payloadSize,
-                          currentPayloadSize);
-
-      m_sender->send(osc::MessageGenerator(maxPacketSize)(
-          "/box/images", packetCount, packetID, trackNameChar, imagePart));
+        imageData = dataBuffer.data();
     }
+    while(size > maximumImageSize);
+
+    osc::Blob imageBlob(imageData.data(),
+                          imageData.size());
+    m_sender->send(osc::MessageGenerator(1 << 16)("/box/images", trackNameChar, imageBlob));
   }
 }
 
