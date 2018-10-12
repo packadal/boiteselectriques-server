@@ -542,7 +542,7 @@ void Server::updateBeatCount(double t) { // in seconds
 }
 
 void Server::onSongLoaded() {
-  sendImages();
+  //  sendImages();
   sendTracksList();
   updateTrackStatus();
   sendReady(true);
