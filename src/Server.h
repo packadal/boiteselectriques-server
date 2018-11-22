@@ -9,10 +9,7 @@
 #include "PlayThread.h"
 #include "SaveManager.h"
 #include "SerialManager.h"
-
-#include "osc/oscmessagegenerator.h"
-#include "osc/oscreceiver.h"
-#include "osc/oscsender.h"
+#include "transmitter.hpp"
 
 class SaveManager;
 
@@ -33,13 +30,13 @@ class Server : public QObject {
 
   friend class SaveManager;
 
- private:
-  PlayThread* m_player; /*< Audio play manager */
+private:
+  PlayThread *m_player; /*< Audio play manager */
   QThread m_playThread;
   SaveManager m_saveManager;           /*< File handling manager */
   SerialManager m_serialManager{this}; /*< Interface with serial port */
 
-  QSettings* m_options; /*< Config options */
+  QSettings *m_options; /*< Config options */
 
   SongData m_song;   /*< Actual song's data */
   QString m_selSong; /*< Selected song's name */
@@ -52,8 +49,7 @@ class Server : public QObject {
 
   bool m_playSignalSent = false;
 
-  OscReceiver* m_receiver; /*< Receiving interface with OSC protocol */
-  OscSender* m_sender;     /*< Sending interface with OSC protocol */
+  Transmitter *m_transmitter;
 
   /**
    * @brief Setup WiringPi interface
@@ -70,98 +66,98 @@ class Server : public QObject {
    *
    * Remove a local song file
    */
-  void handle__box_deleteSong(osc::ReceivedMessageArgumentStream args);
+  void handle__box_deleteSong(QDataStream &args);
   /**
    * @brief update_threshold event handling
    * @param args New threshold value
    *
    * Change the threshold value
    */
-  void handle__box_updateThreshold(osc::ReceivedMessageArgumentStream args);
+  void handle__box_updateThreshold(QDataStream &args);
   /**
    * @brief reset_threshold event handling
    * @param args Nothing
    *
    * Reset the threshold value
    */
-  void handle__box_resetThreshold(osc::ReceivedMessageArgumentStream args);
+  void handle__box_resetThreshold(QDataStream &args);
   /**
    * @brief enable event handling
    * @param args Track number
    *
    * Switch a track state (enable/disable)
    */
-  void handle__box_enable(osc::ReceivedMessageArgumentStream args);
+  void handle__box_enable(QDataStream &args);
   /**
    * @brief volume event handling
    * @param args Track number and new volume (integer)
    *
    * Change the volume of a track
    */
-  void handle__box_volume(osc::ReceivedMessageArgumentStream args);
+  void handle__box_volume(QDataStream &args);
   /**
    * @brief pan event handling
    * @param args Track number and new pan (integer)
    *
    * Change the pan (left-right volume) of a track
    */
-  void handle__box_pan(osc::ReceivedMessageArgumentStream args);
+  void handle__box_pan(QDataStream &args);
   /**
    * @brief mute event handling
    * @param args Track number and new state (boolean)
    *
    * Mute or unmute a track
    */
-  void handle__box_mute(osc::ReceivedMessageArgumentStream args);
+  void handle__box_mute(QDataStream &args);
   /**
    * @brief solo event handling
    * @param args Track number and new state (boolean)
    *
    * "Solo" or "unsolo" a track
    */
-  void handle__box_solo(osc::ReceivedMessageArgumentStream args);
+  void handle__box_solo(QDataStream &args);
   /**
    * @brief play event handling
    * @param args Nothing
    *
    * Play the song
    */
-  void handle__box_play(osc::ReceivedMessageArgumentStream args);
+  void handle__box_play(QDataStream &args);
   /**
    * @brief stop event handling
    * @param args Nothing
    *
    * Stop the song
    */
-  void handle__box_stop(osc::ReceivedMessageArgumentStream args);
+  void handle__box_stop(QDataStream &args);
   /**
    * @brief master event handling
    * @param args New volume (integer)
    *
    * Change the master volume
    */
-  void handle__box_master(osc::ReceivedMessageArgumentStream args);
+  void handle__box_master(QDataStream &args);
   /**
    * @brief reset event handling
    * @param args Nothing
    *
    * Stop the song and reset its options to their default values
    */
-  void handle__box_reset(osc::ReceivedMessageArgumentStream args);
+  void handle__box_reset(QDataStream &args);
   /**
    * @brief refresh_song event handling
    * @param args Nothing
    *
    * Refresh the song data
    */
-  void handle__box_refreshSong(osc::ReceivedMessageArgumentStream args);
+  void handle__box_refreshSong(QDataStream &args);
   /**
    * @brief select_song event handling
    * @param args Song's filename (char*)
    *
    * Select a new song
    */
-  void handle__box_selectSong(osc::ReceivedMessageArgumentStream args);
+  void handle__box_selectSong(QDataStream &args);
   /**
    * @brief sync event handling
    * @param args Nothing
@@ -169,20 +165,20 @@ class Server : public QObject {
    * Send the informations of the actual song and the current state of the
    * player
    */
-  void handle__box_sync(osc::ReceivedMessageArgumentStream args);
+  void handle__box_sync(QDataStream &args);
 
   /**
    * @brief quits the application to ensure everything is reset
    * @param args unused
    */
-  void handle__box_quit(osc::ReceivedMessageArgumentStream args);
+  void handle__box_quit(QDataStream &args);
 
- public:
+public:
   /**
    * @brief Constructor of the Server class
    * @param opt Configuration data
    */
-  explicit Server(QSettings* opt);
+  explicit Server(QSettings *opt);
   ~Server();
 
   /**
@@ -191,7 +187,7 @@ class Server : public QObject {
    * @return If the config options have been loaded (true) or generated from the
    * default values (false)
    */
-  bool initConf(QSettings* c);
+  bool initConf(QSettings *c);
 
   /**
    * @brief Activate the LED on pos n
@@ -217,7 +213,7 @@ class Server : public QObject {
   void ledBlink();
   void sendSolo();
 
- signals:
+signals:
   /**
    * @brief Notify of a new threshold value
    * @param threshold New threshold value
@@ -230,7 +226,7 @@ class Server : public QObject {
 
   void playSong();
 
- public slots:
+public slots:
   /**
    * @brief Reset the values to default
    */
@@ -331,8 +327,8 @@ class Server : public QObject {
 
   void sendMute();
 
- protected:
+protected:
   void updateTrackStatus();
 };
 
-#endif  // SERVER_H
+#endif // SERVER_H

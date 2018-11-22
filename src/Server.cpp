@@ -76,11 +76,12 @@ Server::Server(QSettings *opt) : m_options(opt) {
   m_player = new PlayThread(m_options);
   m_player->moveToThread(&m_playThread);
   connect(m_player, &PlayThread::actualBeatChanged, this, &Server::updateBeat,
-          Qt::DirectConnection);
+          Qt::QueuedConnection);
   connect(m_player, &PlayThread::beatCountChanged, this,
           &Server::updateBeatCount);
   connect(m_player, &PlayThread::songLoaded, this, &Server::onSongLoaded);
-  connect(m_player, &PlayThread::playChanged, this, &Server::sendPlay);
+  connect(m_player, &PlayThread::playChanged, this, &Server::sendPlay,
+          Qt::QueuedConnection);
 
   connect(this, &Server::playSong, m_player, &PlayThread::playSong);
 
@@ -89,56 +90,69 @@ Server::Server(QSettings *opt) : m_options(opt) {
 
   m_playThread.start();
 
-  m_receiver = new OscReceiver(m_options->value("osc/receiver").toUInt());
-  m_sender = new OscSender(m_options->value("osc/ip").toString().toStdString(),
-                           m_options->value("osc/sender").toInt());
+  m_transmitter =
+      new Transmitter(m_options->value("osc/ip").toString(), 9989, 9988);
+
+//  m_receiver = new OscReceiver(m_options->value("osc/receiver").toUInt());
+//  m_sender = new
+//  OscSender(m_options->value("osc/ip").toString().toStdString(),
+//                           m_options->value("osc/sender").toInt());
 
 // this allows to build and run on a PC for easier development
 #ifdef __arm__
   m_serialManager.start();
 #endif
   // Client events
-  m_receiver->addHandler("/box/update_threshold",
-                         std::bind(&Server::handle__box_updateThreshold, this,
-                                   std::placeholders::_1));
-  m_receiver->addHandler("/box/reset_threshold",
-                         std::bind(&Server::handle__box_resetThreshold, this,
-                                   std::placeholders::_1));
-  m_receiver->addHandler("/box/enable", std::bind(&Server::handle__box_enable,
-                                                  this, std::placeholders::_1));
-  m_receiver->addHandler("/box/volume", std::bind(&Server::handle__box_volume,
-                                                  this, std::placeholders::_1));
-  m_receiver->addHandler("/box/pan", std::bind(&Server::handle__box_pan, this,
-                                               std::placeholders::_1));
-  m_receiver->addHandler("/box/mute", std::bind(&Server::handle__box_mute, this,
-                                                std::placeholders::_1));
-  m_receiver->addHandler("/box/solo", std::bind(&Server::handle__box_solo, this,
-                                                std::placeholders::_1));
-  m_receiver->addHandler("/box/master", std::bind(&Server::handle__box_master,
-                                                  this, std::placeholders::_1));
-  m_receiver->addHandler("/box/play", std::bind(&Server::handle__box_play, this,
-                                                std::placeholders::_1));
-  m_receiver->addHandler("/box/stop", std::bind(&Server::handle__box_stop, this,
-                                                std::placeholders::_1));
-  m_receiver->addHandler("/box/reset", std::bind(&Server::handle__box_reset,
-                                                 this, std::placeholders::_1));
-  m_receiver->addHandler(
+  m_transmitter->registerEventHandler(
+      "/box/update_threshold", std::bind(&Server::handle__box_updateThreshold,
+                                         this, std::placeholders::_1));
+  m_transmitter->registerEventHandler(
+      "/box/reset_threshold", std::bind(&Server::handle__box_resetThreshold,
+                                        this, std::placeholders::_1));
+  m_transmitter->registerEventHandler(
+      "/box/enable",
+      std::bind(&Server::handle__box_enable, this, std::placeholders::_1));
+  m_transmitter->registerEventHandler(
+      "/box/volume",
+      std::bind(&Server::handle__box_volume, this, std::placeholders::_1));
+  m_transmitter->registerEventHandler(
+      "/box/pan",
+      std::bind(&Server::handle__box_pan, this, std::placeholders::_1));
+  m_transmitter->registerEventHandler(
+      "/box/mute",
+      std::bind(&Server::handle__box_mute, this, std::placeholders::_1));
+  m_transmitter->registerEventHandler(
+      "/box/solo",
+      std::bind(&Server::handle__box_solo, this, std::placeholders::_1));
+  m_transmitter->registerEventHandler(
+      "/box/master",
+      std::bind(&Server::handle__box_master, this, std::placeholders::_1));
+  m_transmitter->registerEventHandler(
+      "/box/play",
+      std::bind(&Server::handle__box_play, this, std::placeholders::_1));
+  m_transmitter->registerEventHandler(
+      "/box/stop",
+      std::bind(&Server::handle__box_stop, this, std::placeholders::_1));
+  m_transmitter->registerEventHandler(
+      "/box/reset",
+      std::bind(&Server::handle__box_reset, this, std::placeholders::_1));
+  m_transmitter->registerEventHandler(
       "/box/refresh_song",
       std::bind(&Server::handle__box_refreshSong, this, std::placeholders::_1));
-  m_receiver->addHandler(
+  m_transmitter->registerEventHandler(
       "/box/select_song",
       std::bind(&Server::handle__box_selectSong, this, std::placeholders::_1));
-  m_receiver->addHandler("/box/sync", std::bind(&Server::handle__box_sync, this,
-                                                std::placeholders::_1));
+  m_transmitter->registerEventHandler(
+      "/box/sync",
+      std::bind(&Server::handle__box_sync, this, std::placeholders::_1));
 
-  m_receiver->addHandler(
+  m_transmitter->registerEventHandler(
       "/box/delete_song",
       std::bind(&Server::handle__box_deleteSong, this, std::placeholders::_1));
 
-  m_receiver->addHandler("/box/quit", std::bind(&Server::handle__box_quit, this,
-                                                std::placeholders::_1));
-
-  m_receiver->run();
+  m_transmitter->registerEventHandler(
+      "/box/quit",
+      std::bind(&Server::handle__box_quit, this, std::placeholders::_1));
 }
 
 Server::~Server() {
@@ -193,36 +207,35 @@ bool Server::initConf(QSettings *c) {
   }
 
   // Debugging
-  QStringList lst = c->allKeys();
-  for (QStringList::const_iterator k = lst.constBegin(); k < lst.constEnd();
-       k++) {
-    qDebug() << *k << " : " << c->value(*k).toString();
-  }
+  //  QStringList lst = c->allKeys();
+  //  for (QStringList::const_iterator k = lst.constBegin(); k < lst.constEnd();
+  //       k++) {
+  //    qDebug() << *k << " : " << c->value(*k).toString();
+  //  }
 
   return false;
 }
 
 void Server::sendReady(bool isReady) {
-  m_sender->send(osc::MessageGenerator()("/box/ready", isReady));
+  m_transmitter->send("/box/ready", isReady);
 }
 
 void Server::sendThreshold() {
-  m_sender->send(osc::MessageGenerator()("/box/sensor", m_threshold));
+  m_transmitter->send("/box/sensor", m_threshold);
 }
 
 void Server::sendActivatedTracks() {
-  m_sender->send(osc::MessageGenerator()("/box/enable_sync",
-                                         m_player->getActivatedTracks()));
+  m_transmitter->send("/box/enable_sync", m_player->getActivatedTracks());
 }
 
 void Server::sendMasterVolume() {
-  m_sender->send(osc::MessageGenerator()(
-      "/box/master", static_cast<int>(m_player->masterVolume())));
+  m_transmitter->send("/box/master",
+                      static_cast<int>(m_player->masterVolume()));
 }
 
 void Server::sendPlay() {
   m_playSignalSent = false;
-  m_sender->send(osc::MessageGenerator()("/box/play", m_player->isPlaying()));
+  m_transmitter->send("/box/play", m_player->isPlaying());
 }
 
 void Server::sendImages() {
@@ -231,34 +244,31 @@ void Server::sendImages() {
     if (track.image.isNull()) {
       continue;
     }
-    const QByteArray imageName =
-        m_song.name.toUtf8() + " - " + track.name.toUtf8();
-    const char *trackNameChar = imageName.data();
+    //    const QByteArray imageName =
+    //        m_song.name.toUtf8() + " - " + track.name.toUtf8();
+    //    const char *trackNameChar = imageName.data();
 
-    const int maximumImageSize = (1 << 16) - 200 - imageName.size();
-    int quality = 100;
-    int size = -1;
+    //    const int maximumImageSize = (1 << 16) - 200 - imageName.size();
+    //    int quality = 100;
+    //    int size = -1;
 
     QByteArray imageData;
 
-    do {
-        QBuffer dataBuffer;
-        dataBuffer.open(QBuffer::ReadWrite);
-        track.image.save(&dataBuffer, "JPG", quality);
-        dataBuffer.close();
+    //    do {
+    QBuffer dataBuffer;
+    dataBuffer.open(QBuffer::ReadWrite);
+    track.image.save(&dataBuffer, "JPG", 100);
+    dataBuffer.close();
 
-        size = dataBuffer.size();
+    //      size = dataBuffer.size();
 
-        std::cerr << quality << " => " << size << std::endl;
-        quality -= 10;
+    //      std::cerr << quality << " => " << size << std::endl;
+    //      quality -= 10;
 
-        imageData = dataBuffer.data();
-    }
-    while(size > maximumImageSize);
+    imageData = dataBuffer.data();
+    //    } while (size > maximumImageSize);
 
-    osc::Blob imageBlob(imageData.data(),
-                          imageData.size());
-    m_sender->send(osc::MessageGenerator(1 << 16)("/box/images", trackNameChar, imageBlob));
+    m_transmitter->send("/box/images", track.name, imageData);
   }
 }
 
@@ -269,7 +279,7 @@ void Server::sendMute() {
                       ? (1 << i)
                       : 0;
   }
-  m_sender->send(osc::MessageGenerator()("/box/mute", muteStatus));
+  m_transmitter->send("/box/mute", muteStatus);
 }
 
 void Server::sendTracksList() {
@@ -279,37 +289,24 @@ void Server::sendTracksList() {
       tracks << m_player->track(i)->getName();
     }
   }
-  QByteArray trackList = tracks.join('|').toUtf8();
-  const char *trackListChar = trackList.data();
-  m_sender->send(osc::MessageGenerator()("/box/tracks_list", trackListChar));
+  m_transmitter->send("/box/tracks_list", tracks);
 }
 
-void Server::sendBeat(double beat) {
-  m_sender->send(osc::MessageGenerator()("/box/beat", beat));
-}
+void Server::sendBeat(double beat) { m_transmitter->send("/box/beat", beat); }
 
 void Server::sendSongsList() {
   QDir exportFolder(m_options->value("files/folder").toString());
 
   exportFolder.setNameFilters(
       QStringList() << m_options->value("files/extension").toString());
-  QStringList fileList = exportFolder.entryList();
-  QByteArray list = fileList.join("|").toUtf8();
-  const char *c_list = list.data();
 
-  m_sender->send(osc::MessageGenerator()("/box/songs_list", c_list));
+  m_transmitter->send("/box/songs_list", exportFolder.entryList());
 }
 
-void Server::sendSongTitle() {
-  QByteArray title = m_song.name.toUtf8();
-  const char *c_title = title.data();
+void Server::sendSongTitle() { m_transmitter->send("/box/title", m_song.name); }
 
-  m_sender->send(osc::MessageGenerator()("/box/title", c_title));
-}
-
-void Server::handle__box_updateThreshold(
-    osc::ReceivedMessageArgumentStream args) {
-  osc::int32 senseUpdated;
+void Server::handle__box_updateThreshold(QDataStream &args) {
+  qint32 senseUpdated;
   args >> senseUpdated;
 
   ledBlink();
@@ -317,17 +314,16 @@ void Server::handle__box_updateThreshold(
   sendThreshold();
 }
 
-void Server::handle__box_resetThreshold(
-    osc::ReceivedMessageArgumentStream args) {
-  osc::int32 senseUpdated;
+void Server::handle__box_resetThreshold(QDataStream &args) {
+  qint32 senseUpdated;
   args >> senseUpdated;
 
   ledBlink();
   emit resetThreshold();
 }
 
-void Server::handle__box_enable(osc::ReceivedMessageArgumentStream args) {
-  osc::int32 box;
+void Server::handle__box_enable(QDataStream &args) {
+  qint32 box;
   args >> box;
   bool activated;
   args >> activated;
@@ -337,9 +333,9 @@ void Server::handle__box_enable(osc::ReceivedMessageArgumentStream args) {
   sendActivatedTracks();
 }
 
-void Server::handle__box_volume(osc::ReceivedMessageArgumentStream args) {
-  osc::int32 box;
-  osc::int32 vol;
+void Server::handle__box_volume(QDataStream &args) {
+  qint32 box;
+  qint32 vol;
   args >> box >> vol;
 
   ledBlink();
@@ -348,9 +344,9 @@ void Server::handle__box_volume(osc::ReceivedMessageArgumentStream args) {
   sendTrackVolume(box, m_player->volume(box));
 }
 
-void Server::handle__box_pan(osc::ReceivedMessageArgumentStream args) {
-  osc::int32 box;
-  osc::int32 vol;
+void Server::handle__box_pan(QDataStream &args) {
+  qint32 box;
+  qint32 vol;
   args >> box >> vol;
 
   ledBlink();
@@ -359,8 +355,8 @@ void Server::handle__box_pan(osc::ReceivedMessageArgumentStream args) {
   sendTrackPan(box, m_player->pan(box));
 }
 
-void Server::handle__box_mute(osc::ReceivedMessageArgumentStream args) {
-  osc::int32 box;
+void Server::handle__box_mute(QDataStream &args) {
+  qint32 box;
   bool state;
   args >> box >> state;
 
@@ -377,11 +373,11 @@ void Server::sendSolo() {
                       ? (1 << i)
                       : 0;
   }
-  m_sender->send(osc::MessageGenerator()("/box/solo", soloStatus));
+  m_transmitter->send("/box/solo", soloStatus);
 }
 
-void Server::handle__box_solo(osc::ReceivedMessageArgumentStream args) {
-  osc::int32 box;
+void Server::handle__box_solo(QDataStream &args) {
+  qint32 box;
   bool state;
   args >> box >> state;
 
@@ -393,8 +389,8 @@ void Server::handle__box_solo(osc::ReceivedMessageArgumentStream args) {
   sendActivatedTracks();
 }
 
-void Server::handle__box_master(osc::ReceivedMessageArgumentStream args) {
-  osc::int32 vol;
+void Server::handle__box_master(QDataStream &args) {
+  qint32 vol;
   args >> vol;
 
   ledBlink();
@@ -402,7 +398,7 @@ void Server::handle__box_master(osc::ReceivedMessageArgumentStream args) {
   m_player->setMasterVolume(vol);
 }
 
-void Server::handle__box_play(osc::ReceivedMessageArgumentStream args) {
+void Server::handle__box_play(QDataStream &args) {
   bool state;
   args >> state;
 
@@ -410,7 +406,7 @@ void Server::handle__box_play(osc::ReceivedMessageArgumentStream args) {
   play();
 }
 
-void Server::handle__box_stop(osc::ReceivedMessageArgumentStream args) {
+void Server::handle__box_stop(QDataStream &args) {
   bool state;
   args >> state;
 
@@ -418,7 +414,7 @@ void Server::handle__box_stop(osc::ReceivedMessageArgumentStream args) {
   stop();
 }
 
-void Server::handle__box_reset(osc::ReceivedMessageArgumentStream args) {
+void Server::handle__box_reset(QDataStream &args) {
   bool state;
   args >> state;
 
@@ -435,7 +431,7 @@ void Server::handle__box_reset(osc::ReceivedMessageArgumentStream args) {
   sendSolo();
 }
 
-void Server::handle__box_refreshSong(osc::ReceivedMessageArgumentStream args) {
+void Server::handle__box_refreshSong(QDataStream &args) {
   bool state;
   args >> state;
 
@@ -443,20 +439,19 @@ void Server::handle__box_refreshSong(osc::ReceivedMessageArgumentStream args) {
   load();
 }
 
-void Server::handle__box_selectSong(osc::ReceivedMessageArgumentStream args) {
-  const char *receptSong;
+void Server::handle__box_selectSong(QDataStream &args) {
+  QString receptSong;
   args >> receptSong;
 
   ledBlink();
 
-  QString so = QString(receptSong);
-  if (!so.isEmpty())
-    m_selSong = so;
+  if (!receptSong.isEmpty())
+    m_selSong = receptSong;
 
   load();
 }
 
-void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
+void Server::handle__box_sync(QDataStream &args) {
   bool state;
   args >> state;
 
@@ -475,9 +470,7 @@ void Server::handle__box_sync(osc::ReceivedMessageArgumentStream args) {
   sendReady(m_player->getTracksCount() > 0);
 }
 
-void Server::handle__box_quit(osc::ReceivedMessageArgumentStream /*args*/) {
-  exit(0);
-}
+void Server::handle__box_quit(QDataStream & /*args*/) { exit(0); }
 
 void Server::updateTrackStatus() {
   sendMute();
@@ -542,22 +535,23 @@ void Server::updateBeatCount(double t) { // in seconds
 }
 
 void Server::onSongLoaded() {
-  //  sendImages();
+  sendSongTitle();
+  sendImages();
   sendTracksList();
   updateTrackStatus();
   sendReady(true);
 }
 
 void Server::sendTrackVolume(int track, int volume) {
-  m_sender->send(osc::MessageGenerator()("/box/volume", track, volume));
+  m_transmitter->send("/box/volume", track, volume);
 }
 
 void Server::sendTrackPan(int track, int pan) {
-  m_sender->send(osc::MessageGenerator()("/box/pan", track, pan));
+  m_transmitter->send("/box/pan", track, pan);
 }
 
-void Server::handle__box_deleteSong(osc::ReceivedMessageArgumentStream args) {
-  const char *receptSong;
+void Server::handle__box_deleteSong(QDataStream &args) {
+  QString receptSong;
   args >> receptSong;
 
   QFile::remove(m_options->value("files/folder").toString() + receptSong);

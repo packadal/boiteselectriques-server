@@ -9,6 +9,8 @@
 #include "SongData.h"
 #include "Track.h"
 
+#include <QSettings>
+#include <QThread>
 #include <benchmark/Amplify.h>
 #include <benchmark/Mute.h>
 #include <benchmark/Pan.h>
@@ -20,11 +22,8 @@
 #include <io/proxies/SummationProxy.h>
 #include <manager/StreamingManager.h>
 #include <unistd.h>
-#include <QSettings>
-#include <QThread>
 
-template <typename T>
-class StreamingManager;
+template <typename T> class StreamingManager;
 
 /**
  * @brief The PlayThread class
@@ -33,8 +32,8 @@ class StreamingManager;
  */
 class PlayThread : public QObject {
   Q_OBJECT
- public:
-  explicit PlayThread(QSettings*);
+public:
+  explicit PlayThread(QSettings *);
 
   /**
    * @brief Give the number of the song's tracks
@@ -54,7 +53,7 @@ class PlayThread : public QObject {
    */
   bool isPlaying() const;
 
- signals:
+signals:
 
   void playChanged();
 
@@ -75,7 +74,7 @@ class PlayThread : public QObject {
    */
   void songLoaded();
 
- public slots:
+public slots:
 
   /**
    * @brief Stop the playing
@@ -132,7 +131,7 @@ class PlayThread : public QObject {
    * @param track Track number
    * @return Pointer to the asked Track
    */
-  Track* track(const size_t track) const;
+  Track *track(const size_t track) const;
 
   /**
    * @brief Change the solo state of a track
@@ -182,7 +181,7 @@ class PlayThread : public QObject {
    * @brief Load a song in the engine
    * @param s Song's informations
    */
-  void load(const SongData& s);
+  void load(const SongData &s);
 
   /**
    * @brief Check if a given track exists
@@ -191,13 +190,13 @@ class PlayThread : public QObject {
    */
   bool isValidTrack(size_t track) const;
 
- private:
-  QSettings* m_options;
+private:
+  QSettings *m_options;
   Parameters<double> m_conf; /*< Configuration data */
   std::shared_ptr<Amplify<double>> m_masterVolume{new Amplify<double>(m_conf)};
   std::shared_ptr<StreamingManager<double>> m_manager;
 
-  std::vector<Track*> m_tracks; /*< List of the current song's tracks */
+  std::vector<Track *> m_tracks; /*< List of the current song's tracks */
 
   int m_bufferCount{};    /*< Buffer in which we are s*/
   int m_maxBufferCount{}; /*< Total buffer count in a loop */
@@ -208,4 +207,4 @@ class PlayThread : public QObject {
   static const unsigned int DEFAULT_MASTER_VOLUME = 50;
 };
 
-#endif  // PLAYTHREAD_H
+#endif // PLAYTHREAD_H

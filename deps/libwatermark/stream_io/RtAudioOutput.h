@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include <RtAudio.h>
-//#include <rtaudio/RtAudio.h>
+//#include <RtAudio.h>
+#include <rtaudio/RtAudio.h>
 #include "StreamingOutputInterface.h"
 #include "mathutils/math_util.h"
 #include <functional>
@@ -86,7 +86,13 @@ private:
 
     typename StreamingOutputInterface<data_type>::output_handler _handler;
 
+// on raspberry PI we use ALSA, but my PC uses pulseaudio
+#ifdef __arm__
     RtAudio audio{RtAudio::LINUX_ALSA};
+#else
+    RtAudio audio{RtAudio::LINUX_PULSE};
+#endif
+
     RtAudio::StreamParameters parameters;
     bool isRunning{};
 };

@@ -1,4 +1,4 @@
-QT += core gui serialport
+QT += core gui serialport network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += serialport
 
@@ -8,7 +8,7 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -std=c++1y -Wall -Wextra
 
 QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS_RELEASE += -Ofast -march=armv6 -flto -fopenmp
+QMAKE_CXXFLAGS_RELEASE += -Ofast -flto -fopenmp #-march=armv6
 QMAKE_LFLAGS_RELEASE -= -Wl,-O1
 QMAKE_LFLAGS_RELEASE += -Wl,-O3 -Wl,-flto
 
@@ -28,23 +28,21 @@ HEADERS += Server.h \
 	PlayThread.h \
         SongData.h \
 	SaveManager.h \
-        SerialManager.h
+        SerialManager.h \
+    transmitter.hpp
 
 INCLUDEPATH += 	$$PWD/../deps/libwatermark
 DEPENDPATH += $$PWD/../deps/libwatermark
 
-INCLUDEPATH += /usr/include/oscpack
-
 # KArchive
-INCLUDEPATH += /usr/local/include/KF5/KArchive
-DEPENDPATH += /usr/local/lib/arm-linux-gnueabihf
-PRE_TARGETDEPS += /usr/local/lib/arm-linux-gnueabihf/libKF5Archive.so.5
+#INCLUDEPATH += /usr/local/include/KF5/KArchive
+#DEPENDPATH += /usr/local/lib/arm-linux-gnueabihf
+#PRE_TARGETDEPS += /usr/local/lib/arm-linux-gnueabihf/libKF5Archive.so.5
 
 
 LIBS+= -lgomp -lsndfile
 LIBS+= -lrtaudio
 LIBS+= -lasound
-LIBS+= -loscpack
 LIBS+= -lwiringPi
 LIBS+= -lKF5Archive
 
