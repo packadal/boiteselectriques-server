@@ -8,7 +8,7 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -std=c++1y -Wall -Wextra
 
 QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS_RELEASE += -Ofast -flto -fopenmp #-march=armv6
+QMAKE_CXXFLAGS_RELEASE += -Ofast -flto -fopenmp -march=armv6
 QMAKE_LFLAGS_RELEASE -= -Wl,-O1
 QMAKE_LFLAGS_RELEASE += -Wl,-O3 -Wl,-flto
 
