@@ -9,6 +9,8 @@
 #include <QThread>
 #include <QTimer>
 
+#include <functional>
+
 class Transmitter : public QObject {
   Q_OBJECT
 
