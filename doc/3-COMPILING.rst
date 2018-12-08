@@ -11,33 +11,7 @@ Packaged dependencies
 
 First, let's download the basic tools for compilation, plus the server's dependencies, from the official repo::
 
-  $ sudo apt-get install build-essential git liboscpack-dev libqt5serialport5-dev librtaudio-dev libsndfile1-dev qt5-default qt5-qmake wiringpi
-
-Extra CMake Modules
-~~~~~~~~~~~~~~~~~~~
-
-Then, we need the Extra CMake Modules to compile KArchive.
-The problem is that the version in the official repositories is not enough up-to-date, so we need to compile a more recent verion::
-
-  $ sudo apt-get install cmake
-  $ git clone git://anongit.kde.org/extra-cmake-modules
-  $ cd extra-cmake-modules
-  $ mkdir build && cd build && cmake .. && make && sudo make install
-
-KArchive
-~~~~~~~~~~
-
-Now, we can compile KArchive::
-
-  $ wget http://download.kde.org/stable/frameworks/5.17/karchive-5.17.0.tar.xz
-  $ tar -xf karchive-5.17.0.tar.xz
-  $ cd karchive-5.17.0
-  $ mkdir build && cd build && cmake .. && make && sudo make install
-
-Additional notes
-~~~~~~~~~~~~~~~~
-
-If there is any problem with those dependencies, or if you can't download the ``liboscpack-dev`` from the official Raspbian repo, you can download the sources from `our git repo <https://github.com/hixe33/boiteselectriques-server-deps>`_
+  $ sudo apt-get install build-essential git libqt5serialport5-dev librtaudio-dev libsndfile1-dev qt5-default qt5-qmake wiringpi libkf5archive-dev
 
 Building the program
 --------------------

@@ -36,10 +36,11 @@ DEPENDPATH += $$PWD/../deps/libwatermark
 INCLUDEPATH += /usr/include/oscpack
 
 # KArchive
-INCLUDEPATH += /usr/local/include/KF5/KArchive
-DEPENDPATH += /usr/local/lib/arm-linux-gnueabihf
-PRE_TARGETDEPS += /usr/local/lib/arm-linux-gnueabihf/libKF5Archive.so.5
-
+unix{
+    INCLUDEPATH += /usr/include/KF5/KArchive
+    DEPENDPATH += /usr/lib/arm-linux-gnueabihf
+    PRE_TARGETDEPS += /usr/lib/arm-linux-gnueabihf/libKF5Archive.so.5
+}
 
 LIBS+= -lgomp -lsndfile
 LIBS+= -lrtaudio
