@@ -440,6 +440,9 @@ void Server::handle__box_refreshSong(QDataStream &args) {
 }
 
 void Server::handle__box_selectSong(QDataStream &args) {
+  // make sure the previous song is stopped
+  stop();
+
   QString receptSong;
   args >> receptSong;
 
