@@ -12,17 +12,18 @@ Then follow one of the two sections' instructions, depending on your equipment, 
 
   # apt-get update && apt-get upgrade
 
-If you have a screen and a USB keyboard
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Accessing the Raspberry Pi without a screen
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You first need to use the raspberry pi with a screen to enable remote connection.
+
+# raspi-config
+
+Then go to: ``5 Interfacing Options`` -> ``P2 SSH`` -> ``<Yes>`` -> ``<Ok>`` -> ``<Finish>``
+
+This will allow you to connect remotely to the Raspberry Pi.
 
 If you have a screen with a HDMI port, connect it to your Raspberry Pi and do the same with a USB keyboard. Then power your Raspberry Pi on and follow the onscreen instructions to perform the installation.
-
-If you don't
-~~~~~~~~~~~~
-
-If you don't have both a screen and a keyboard, you can still access it through SSH.
-
-To do that, once the image has been written on the card, mount its ``boot`` partition, open the ``commandline.txt`` file and add ``silentinstall`` at the beginning of the first line.
 
 Then, connect the Pi to your network (or directly to your computer, creating a local network !) with an Ethernet cable and power it on. You can scan your network with the ``nmap`` command to find your Pi IP address and connect you to it through SSH (default password : ``raspberry``)::
 
@@ -38,7 +39,7 @@ For the Boîtes Électriques Server's executable to be able to run correctly, yo
 
   # raspi-config
   
-Then go to: ``9 Advanced Options`` -> ``A5 SPI`` -> ``<Yes>`` -> ``<Ok>`` -> ``<Finish>``
+Then go to: ``5 Interfacing Options`` -> ``P4 SPI`` -> ``<Yes>`` -> ``<Ok>`` -> ``<Finish>``
 
 Warning : this must be done before executing the server (``be-server``), else it won't run.
 
