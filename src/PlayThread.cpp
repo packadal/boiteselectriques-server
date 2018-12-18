@@ -8,11 +8,7 @@
 #include "Track.h"
 
 #include <io/proxies/SfxInputProxy.h>
-#ifdef __arm__
-#include <RtAudio.h>
-#else
 #include <rtaudio/RtAudio.h>
-#endif
 #include <stream_io/RtAudioOutput.h>
 #include <QDebug>
 
