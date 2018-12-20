@@ -108,7 +108,8 @@ void PlayThread::reset() {
 
 void PlayThread::solo(const size_t track, const bool state) {
   if (isValidTrack(track))
-    m_tracks[track]->setActivated(true);
+    m_tracks[track]->setActivated(state ||
+                                  m_tracks[track]->wasPreviouslyActivated());
 
   bool soloTracks = false;
   for (unsigned char i = 0; i < m_tracks.size(); ++i) {

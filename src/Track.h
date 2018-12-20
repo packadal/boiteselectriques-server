@@ -30,6 +30,7 @@ class Track : public QObject {
   QString m_name;
   bool m_soloState = false;
   bool m_activatedState = false;
+  bool m_previousActivatedState = false;
 
   QSettings* m_options;
 
@@ -63,6 +64,7 @@ class Track : public QObject {
   double getVolume() const;
   double getPan() const;
   bool isActivated() const;
+  bool wasPreviouslyActivated() const;
   bool isSolo() const;
   bool isMuted() const { return m_mute; }
 

@@ -63,6 +63,10 @@ bool Track::isActivated() const {
   return m_activatedState;
 }
 
+bool Track::wasPreviouslyActivated() const {
+  return m_previousActivatedState;
+}
+
 bool Track::isSolo() const {
   return m_soloState;
 }
@@ -78,6 +82,7 @@ void Track::setPan(const double pan) {
 }
 
 void Track::setActivated(const bool state) {
+  m_previousActivatedState = m_activatedState;
   m_activatedState = state;
   updateAudible();
 }
