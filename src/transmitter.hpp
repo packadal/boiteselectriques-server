@@ -24,9 +24,10 @@ public:
         &m_socket,
         QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
         [this]() { qWarning() << m_socket.errorString(); });
-    //    connect(&m_socket, &QAbstractSocket::connected, []() {
-    //      qWarning() << "client connected";
-    //    });
+    connect(&m_socket, &QAbstractSocket::disconnected, []() {
+      qWarning() << "client disconnected";
+      exit(0);
+    });
 
     m_inputData.setDevice(&m_socket);
     m_inputData.setVersion(QDataStream::Qt_5_0);
